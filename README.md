@@ -1,0 +1,1 @@
+# ruby-couchbase-orm-quickstart
