@@ -1,0 +1,12 @@
+common: &common
+  connection_string: couchbase://localhost
+  username: kaustav
+  password: password
+
+development:
+  <<: *common
+  bucket: travel-sample
+
+test:
+  <<: *common
+  bucket: dev_bucket_test
