@@ -9,4 +9,4 @@ development:
 
 test:
   <<: *common
-  bucket: dev_bucket_test
+  bucket: travel-sample
