@@ -16,7 +16,7 @@ class Route < CouchbaseOrm::Base
   attribute :destinationairport, :string
   attribute :stops, :integer
   attribute :equipment, :string
-  attribute :schedule, :array, of: ScheduleDetail
+  attribute :schedule, :array, type: ScheduleDetail
   attribute :distance, :float
 
   validates :type, presence: true

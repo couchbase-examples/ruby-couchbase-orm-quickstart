@@ -65,7 +65,7 @@ RSpec.describe 'Routes API', type: :request do
         post "/api/v1/routes/#{route_id}", params: { route: route_params }
 
         expect(response).to have_http_status(:conflict)
-        expect(JSON.parse(response.body)).to include({ 'error' => 'Route already exists' })
+        expect(JSON.parse(response.body)).to include({ 'message' => "Route with ID #{route_id} already exists" })
       end
     end
   end
@@ -170,7 +170,7 @@ RSpec.describe 'Routes API', type: :request do
         delete "/api/v1/routes/#{route_id}"
 
         expect(response).to have_http_status(:not_found)
-        expect(JSON.parse(response.body)).to eq({ 'message' => 'Route not found' })
+        expect(JSON.parse(response.body)).to eq({ 'message' => 'Route with ID route_delete not found' })
       end
     end
   end

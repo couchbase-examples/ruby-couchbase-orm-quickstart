@@ -1,6 +1,6 @@
 require 'couchbase-orm'
 
-class Airline < ApplicationRecord
+class Airline < CouchbaseOrm::Base
   attribute :name, :string
   attribute :callsign, :string
   attribute :iata, :string

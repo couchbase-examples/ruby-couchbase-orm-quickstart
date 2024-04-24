@@ -9,21 +9,28 @@ module Api
       # GET /api/v1/routes/{id}
       def show
         if @route
-          render json: @route, status: :ok
+          render json: @route.attributes.except('id'), status: :ok
         else
-          render json: { error: "Route with ID #{params[:id]} not found" }, status: :not_found
+          render json: { message: "Route with ID #{params[:id]} not found" }, status: :not_found
         end
+      rescue Couchbase::Error::DocumentNotFound => e
+        render json: { error: "Route not found", message: e.message }, status: :not_found
       rescue StandardError => e
         render json: { error: 'Internal server error', message: e.message }, status: :internal_server_error
       end
 
-      # POST /api/v1/routes
+      # POST /api/v1/routes/{id}
       def create
-        @route = Route.create(route_params)
+        @route = Route.find_by(id: params[:id])
         if @route
-          render json: @route, status: :created
+          render json: { message: "Route with ID #{params[:id]} already exists" }, status: :conflict
         else
-          render json: { message: 'Route already exists' }, status: :conflict
+          @route = Route.create(route_params)
+          if @route
+            render json: @route, status: :created
+          else
+            render json: { error: 'Failed to create route' }, status: :bad_request
+          end
         end
       rescue ArgumentError => e
         render json: { error: 'Invalid request', message: e.message }, status: :bad_request
@@ -31,13 +38,21 @@ module Api
         render json: { error: 'Internal server error', message: e.message }, status: :internal_server_error
       end
 
-      # PUT /api/v1/routes/{id}
+      # PATCH/PUT /api/v1/routes/{id}
       def update
         if @route
-          @route.update(route_params)
-          render json: @route, status: :ok
+          if @route.update(route_params)
+            render json: @route.attributes.except('id'), status: :ok
+          else
+            render json: { message: 'Failed to update route' }, status: :bad_request
+          end
         else
-          render json: { error: "Route with ID #{params[:id]} not found" }, status: :not_found
+          @route = Route.create(route_params)
+          if @route
+            render json: @route.attributes.except('id'), status: :ok
+          else
+            render json: { message: 'Route already exists' }, status: :conflict
+          end
         end
       rescue ArgumentError => e
         render json: { error: 'Invalid request', message: e.message }, status: :bad_request
@@ -47,50 +62,32 @@ module Api
 
       # DELETE /api/v1/routes/{id}
       def destroy
+        @route = Route.find_by(id: params[:id])
         if @route
-          @route.destroy
-          render json: { message: 'Route deleted successfully' }, status: :accepted
+          if @route.destroy
+            render json: { message: 'Route deleted successfully' }, status: :accepted
+          else
+            render json: { message: 'Failed to delete route' }, status: :bad_request
+          end
         else
-          render json: { error: "Route with ID #{params[:id]} not found" }, status: :not_found
+          render json: { message: "Route with ID #{params[:id]} not found" }, status: :not_found
         end
+      rescue Couchbase::Error::DocumentNotFound => e
+        render json: { error: "Route not found", message: e.message }, status: :not_found
       rescue StandardError => e
         render json: { error: 'Internal server error', message: e.message }, status: :internal_server_error
       end
 
-      # GET /api/v1/routes
-      # def index
-      #   routes = Route.all
-      #   formatted_routes = routes.map do |route|
-      #     {
-      #       airline: route.airline,
-      #       airlineid: route.airlineid,
-      #       sourceairport: route.sourceairport,
-      #       destinationairport: route.destinationairport,
-      #       stops: route.stops,
-      #       equipment: route.equipment,
-      #       schedule: route.schedule,
-      #       distance: route.distance
-      #     }
-      #   end
-      #   render json: formatted_routes
-      # rescue StandardError => e
-      #   render json: { error: e.message }, status: :internal_server_error
-      # end
-
       private
 
       def set_route
-        @route = Route.find(params[:id])
-      rescue ActiveRecord::RecordNotFound
+        @route = Route.find_by(id: params[:id])
+      rescue Couchbase::Error::DocumentNotFound
         @route = nil
       end
 
       def route_params
-        params.require(:route).permit(
-          :id, :airline, :airlineid, :sourceairport,
-          :destinationairport, :stops, :equipment, :distance,
-          schedule: %i[day flight utc]
-        )
+        params.require(:route).permit(:id, :type, :airline, :airlineid, :sourceairport, :destinationairport, :stops, :equipment, :distance, schedule: [:day, :utc, :flight])
       end
     end
   end

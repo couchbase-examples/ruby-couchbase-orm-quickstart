@@ -9,36 +9,50 @@ module Api
       # GET /api/v1/airlines/{id}
       def show
         if @airline
-          render json: @airline, status: :ok
+          render json: @airline.attributes.except('id'), status: :ok
         else
-          render json: { error: "Airline with ID #{params[:id]} not found" }, status: :not_found
+          render json: { message: "Airline with ID #{params[:id]} not found" }, status: :not_found
         end
       rescue Couchbase::Error::DocumentNotFound => e
-        render json: { error: "Airline with ID #{params[:id]} not found", message: e.message }, status: :not_found
+        render json: { error: "Airline not found", message: e.message }, status: :not_found
       rescue StandardError => e
         render json: { error: 'Internal server error', message: e.message }, status: :internal_server_error
       end
 
       # POST /api/v1/airlines/{id}
       def create
-        @airline = Airline.create(airline_params)
+        @airline = Airline.find_by(id: params[:id])
         if @airline
-          render json: @airline, status: :created
+          render json: { message: "Airline with ID #{params[:id]} already exists" }, status: :conflict
         else
-          render json: { message: 'Airline already exists' }, status: :conflict
+          @airline = Airline.create(airline_params)
+          if @airline
+            render json: @airline, status: :created
+          else
+            render json: { error: 'Failed to create airline' }, status: :bad_request
+          end
         end
       rescue ArgumentError => e
         render json: { error: 'Invalid request', message: e.message }, status: :bad_request
-      rescue Couchbase::Error::DocumentExists => e
-        render json: { error: "Airline with ID #{params[:id]} already exists", message: e.message }, status: :conflict
       rescue StandardError => e
         render json: { error: 'Internal server error', message: e.message }, status: :internal_server_error
       end
 
-      # PUT /api/v1/airlines/{id}
       def update
-        @airline = Airline.new(airline_params).update(airline_params)
-        render json: @airline, status: :ok
+        if @airline
+          if @airline.update(airline_params)
+            render json: @airline.attributes.except('id'), status: :ok
+          else
+            render json: { message: 'Failed to update airline' }, status: :bad_request
+          end
+        else
+          @airline = Airline.create(airline_params)
+          if @airline
+            render json: @airline.attributes.except('id'), status: :ok
+          else
+            render json: { message: 'Airline already exists' }, status: :conflict
+          end
+        end
       rescue ArgumentError => e
         render json: { error: 'Invalid request', message: e.message }, status: :bad_request
       rescue StandardError => e
@@ -47,17 +61,18 @@ module Api
 
       # DELETE /api/v1/airlines/{id}
       def destroy
+        @airline = Airline.find_by(id: params[:id])
         if @airline
-          if @airline.destroy(params[:id])
+          if @airline.destroy
             render json: { message: 'Airline deleted successfully' }, status: :accepted
           else
             render json: { message: 'Failed to delete airline' }, status: :bad_request
           end
         else
-          render json: { error: "Airline with ID #{params[:id]} not found" }, status: :not_found
+          render json: { message: "Airline with ID #{params[:id]} not found" }, status: :not_found
         end
       rescue Couchbase::Error::DocumentNotFound => e
-        render json: { error: "Airline with ID #{params[:id]} not found", message: e.message }, status: :not_found
+        render json: { error: "Airline not found", message: e.message }, status: :not_found
       rescue StandardError => e
         render json: { error: 'Internal server error', message: e.message }, status: :internal_server_error
       end
@@ -86,13 +101,13 @@ module Api
       private
 
       def set_airline
-        @airline = Airline.find(params[:id])
+        @airline = Airline.find_by(id: params[:id])
       rescue Couchbase::Error::DocumentNotFound
         @airline = nil
       end
 
       def airline_params
-        params.permit(:id, :name, :iata, :icao, :callsign, :country)
+        params.require(:airline).permit(:id, :name, :iata, :icao, :callsign, :country)
       end
     end
   end
