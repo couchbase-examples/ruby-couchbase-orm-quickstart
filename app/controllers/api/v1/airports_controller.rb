@@ -25,7 +25,7 @@ module Api
         if @airport
           render json: { message: "Airport with ID #{params[:id]} already exists" }, status: :conflict
         else
-          @airport = Airport.new(airport_params)
+          @airport = Airport.new(airport_params.merge(id: params[:id]))
           if @airport.save
             render json: @airport, status: :created
           else
@@ -41,7 +41,7 @@ module Api
 
       # PUT /api/v1/airports/{id}
       def update
-        @airport = Airport.new(airport_params)
+        @airport = Airport.new(airport_params.merge(id: params[:id]))
         if @airport.save
           render json: @airport.attributes.except('id'), status: :ok
         else

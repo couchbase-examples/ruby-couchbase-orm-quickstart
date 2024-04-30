@@ -28,7 +28,6 @@ RSpec.describe 'Airlines API', type: :request do
     let(:airline_id) { 'airline_post' }
     let(:airline_params) do
       {
-        'id' => airline_id, # 'id' is not a required field in the airline_params hash
         'name' => '40-Mile Air',
         'iata' => 'Q5',
         'icao' => 'MLA',
@@ -67,7 +66,6 @@ RSpec.describe 'Airlines API', type: :request do
 
     let(:current_params) do
       {
-        'id' => airline_id, # 'id' is not a required field in the airline_params hash
         'name' => '40-Mile Air',
         'iata' => 'U5',
         'icao' => 'UPD',
@@ -77,7 +75,6 @@ RSpec.describe 'Airlines API', type: :request do
     end
     let(:updated_params) do
       {
-        'id' => airline_id,
         'name' => '41-Mile Air',
         'iata' => 'U6',
         'icao' => 'UPE',
@@ -128,7 +125,6 @@ RSpec.describe 'Airlines API', type: :request do
     let(:airline_id) { 'airline_delete' }
     let(:airline_params) do
       {
-        'id' => airline_id, # 'id' is not a required field in the airline_params hash
         'name' => '40-Mile Air',
         'iata' => 'Q5',
         'icao' => 'MLA',

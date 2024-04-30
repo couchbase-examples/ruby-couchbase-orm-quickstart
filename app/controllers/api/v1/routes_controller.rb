@@ -25,7 +25,7 @@ module Api
         if @route
           render json: { message: "Route with ID #{params[:id]} already exists" }, status: :conflict
         else
-          @route = Route.new(route_params)
+          @route = Route.new(route_params.merge(id: params[:id]))
           if @route.save
             render json: @route, status: :created
           else
@@ -41,7 +41,7 @@ module Api
 
       # PUT /api/v1/routes/{id}
       def update
-        @route = Route.new(route_params)
+        @route = Route.new(route_params.merge(id: params[:id]))
         if @route.save
           render json: @route.attributes.except('id'), status: :ok
         else

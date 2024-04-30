@@ -139,7 +139,6 @@ RSpec.describe 'Routes API', type: :request do
     let(:route_id) { 'route_delete' }
     let(:route_params) do
       {
-        'id' => route_id,
         'airline' => 'AF',
         'airlineid' => 'airline_137',
         'sourceairport' => 'TLV',

@@ -157,7 +157,6 @@ RSpec.describe 'Airports API', type: :request do
     let(:airport_id) { 'airport_delete' }
     let(:airport_params) do
       {
-        'id' => airport_id, # 'id' should be 'airport_delete
         'airportname' => 'Test Airport',
         'city' => 'Test City',
         'country' => 'Test Country',
