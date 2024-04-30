@@ -47,8 +47,8 @@ RSpec.describe 'Airports API', type: :request do
         'airportname' => 'Test Airport',
         'city' => 'Test City',
         'country' => 'Test Country',
-        'faa' => '',
-        'icao' => 'Test LFAG',
+        'faa' => 'Tst', # 'faa' should be 3 characters long
+        'icao' => 'Test', # 'icao' should be 4 characters long
         'tz' => 'Test Europe/Paris',
         'geo' => {
           'lat' => 49.868547,
@@ -139,11 +139,12 @@ RSpec.describe 'Airports API', type: :request do
         expect(response.content_type).to eq('application/json; charset=utf-8')
         expect(JSON.parse(response.body)).to include(current_params)
 
-        put "/api/v1/airports/#{airport_id}", params: { airport: { airportname: '' } }
+        put "/api/v1/airports/#{airport_id}", params: { airport: { airportname: 'temp' } }
 
         expect(response).to have_http_status(:bad_request)
         expect(JSON.parse(response.body)).to include({ 'error' => 'Invalid request',
-                                                       'message' => 'Missing fields: city, country, faa, icao, tz, geo' })
+                                                       'message' => ["City can't be blank", "Country can't be blank",
+                                                                     "Faa can't be blank", 'Faa is the wrong length (should be 3 characters)', "Icao can't be blank", 'Icao is the wrong length (should be 4 characters)', "Tz can't be blank", "Geo can't be blank"] })
       rescue StandardError => e
         puts e
       ensure
@@ -156,6 +157,7 @@ RSpec.describe 'Airports API', type: :request do
     let(:airport_id) { 'airport_delete' }
     let(:airport_params) do
       {
+        'id' => airport_id, # 'id' should be 'airport_delete
         'airportname' => 'Test Airport',
         'city' => 'Test City',
         'country' => 'Test Country',

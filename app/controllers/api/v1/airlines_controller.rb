@@ -14,7 +14,7 @@ module Api
           render json: { message: "Airline with ID #{params[:id]} not found" }, status: :not_found
         end
       rescue Couchbase::Error::DocumentNotFound => e
-        render json: { error: "Airline not found", message: e.message }, status: :not_found
+        render json: { error: 'Airline not found', message: e.message }, status: :not_found
       rescue StandardError => e
         render json: { error: 'Internal server error', message: e.message }, status: :internal_server_error
       end
@@ -25,11 +25,12 @@ module Api
         if @airline
           render json: { message: "Airline with ID #{params[:id]} already exists" }, status: :conflict
         else
-          @airline = Airline.create(airline_params)
-          if @airline
+          @airline = Airline.new(airline_params)
+          if @airline.save
             render json: @airline, status: :created
           else
-            render json: { error: 'Failed to create airline' }, status: :bad_request
+            render json: { error: 'Failed to create airline', message: @airline.errors.full_messages },
+                   status: :bad_request
           end
         end
       rescue ArgumentError => e
@@ -38,20 +39,15 @@ module Api
         render json: { error: 'Internal server error', message: e.message }, status: :internal_server_error
       end
 
+      # PUT /api/v1/airlines/{id}
       def update
-        if @airline
-          if @airline.update(airline_params)
-            render json: @airline.attributes.except('id'), status: :ok
-          else
-            render json: { message: 'Failed to update airline' }, status: :bad_request
-          end
+        @airline = Airline.new(airline_params)
+        if @airline.save
+          render json: @airline.attributes.except('id'), status: :ok
         else
-          @airline = Airline.create(airline_params)
-          if @airline
-            render json: @airline.attributes.except('id'), status: :ok
-          else
-            render json: { message: 'Airline already exists' }, status: :conflict
-          end
+          render json: { error: 'Invalid request', message: @airline.errors.full_messages },
+                 status: :bad_request
+
         end
       rescue ArgumentError => e
         render json: { error: 'Invalid request', message: e.message }, status: :bad_request
@@ -66,13 +62,14 @@ module Api
           if @airline.destroy
             render json: { message: 'Airline deleted successfully' }, status: :accepted
           else
-            render json: { message: 'Failed to delete airline' }, status: :bad_request
+            render json: { error: 'Failed to delete airline', message: @airline.errors.full_messages },
+                   status: :bad_request
           end
         else
           render json: { message: "Airline with ID #{params[:id]} not found" }, status: :not_found
         end
       rescue Couchbase::Error::DocumentNotFound => e
-        render json: { error: "Airline not found", message: e.message }, status: :not_found
+        render json: { error: 'Airline not found', message: e.message }, status: :not_found
       rescue StandardError => e
         render json: { error: 'Internal server error', message: e.message }, status: :internal_server_error
       end

@@ -9,7 +9,6 @@ class ScheduleDetail < CouchbaseOrm::NestedDocument
 end
 
 class Route < CouchbaseOrm::Base
-  attribute :type, :string
   attribute :airline, :string
   attribute :airlineid, :string
   attribute :sourceairport, :string
@@ -19,7 +18,6 @@ class Route < CouchbaseOrm::Base
   attribute :schedule, :array, type: ScheduleDetail
   attribute :distance, :float
 
-  validates :type, presence: true
   validates :airline, presence: true
   validates :airlineid, presence: true
   validates :sourceairport, presence: true

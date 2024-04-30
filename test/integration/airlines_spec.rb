@@ -92,7 +92,8 @@ RSpec.describe 'Airlines API', type: :request do
 
         expect(response).to have_http_status(:ok)
         expect(response.content_type).to eq('application/json; charset=utf-8')
-        expect(JSON.parse(response.body)).to include(updated_params)
+        # should be updated_params without 'id' key
+        expect(JSON.parse(response.body)).to include(updated_params.except('id'))
       rescue StandardError => e
         puts e
       ensure
@@ -113,7 +114,8 @@ RSpec.describe 'Airlines API', type: :request do
 
         expect(response).to have_http_status(:bad_request)
         expect(JSON.parse(response.body)).to include({ 'error' => 'Invalid request',
-                                                       'message' => 'Missing fields: iata, icao, callsign, country' })
+                                                       'message' => ["Callsign can't be blank", "Iata can't be blank",
+                                                                     'Iata is the wrong length (should be 2 characters)', "Icao can't be blank", 'Icao is the wrong length (should be 3 characters)', "Country can't be blank"] })
       rescue StandardError => e
         puts e
       ensure

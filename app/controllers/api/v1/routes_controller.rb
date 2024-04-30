@@ -14,7 +14,7 @@ module Api
           render json: { message: "Route with ID #{params[:id]} not found" }, status: :not_found
         end
       rescue Couchbase::Error::DocumentNotFound => e
-        render json: { error: "Route not found", message: e.message }, status: :not_found
+        render json: { error: 'Route not found', message: e.message }, status: :not_found
       rescue StandardError => e
         render json: { error: 'Internal server error', message: e.message }, status: :internal_server_error
       end
@@ -25,11 +25,12 @@ module Api
         if @route
           render json: { message: "Route with ID #{params[:id]} already exists" }, status: :conflict
         else
-          @route = Route.create(route_params)
-          if @route
+          @route = Route.new(route_params)
+          if @route.save
             render json: @route, status: :created
           else
-            render json: { error: 'Failed to create route' }, status: :bad_request
+            render json: { error: 'Failed to create route', message: @route.errors.full_messages },
+                   status: :bad_request
           end
         end
       rescue ArgumentError => e
@@ -38,21 +39,14 @@ module Api
         render json: { error: 'Internal server error', message: e.message }, status: :internal_server_error
       end
 
-      # PATCH/PUT /api/v1/routes/{id}
+      # PUT /api/v1/routes/{id}
       def update
-        if @route
-          if @route.update(route_params)
-            render json: @route.attributes.except('id'), status: :ok
-          else
-            render json: { message: 'Failed to update route' }, status: :bad_request
-          end
+        @route = Route.new(route_params)
+        if @route.save
+          render json: @route.attributes.except('id'), status: :ok
         else
-          @route = Route.create(route_params)
-          if @route
-            render json: @route.attributes.except('id'), status: :ok
-          else
-            render json: { message: 'Route already exists' }, status: :conflict
-          end
+          render json: { error: 'Invalid request', message: @route.errors.full_messages },
+                 status: :bad_request
         end
       rescue ArgumentError => e
         render json: { error: 'Invalid request', message: e.message }, status: :bad_request
@@ -67,15 +61,44 @@ module Api
           if @route.destroy
             render json: { message: 'Route deleted successfully' }, status: :accepted
           else
-            render json: { message: 'Failed to delete route' }, status: :bad_request
+            render json: { error: 'Failed to delete route', message: @route.errors.full_messages },
+                   status: :bad_request
           end
         else
           render json: { message: "Route with ID #{params[:id]} not found" }, status: :not_found
         end
       rescue Couchbase::Error::DocumentNotFound => e
-        render json: { error: "Route not found", message: e.message }, status: :not_found
+        render json: { error: 'Route not found', message: e.message }, status: :not_found
       rescue StandardError => e
         render json: { error: 'Internal server error', message: e.message }, status: :internal_server_error
+      end
+
+      # GET /api/v1/routes/list
+      def index
+        routes = Route.all
+        formatted_routes = routes.map do |route|
+          {
+            id: route.id,
+            type: route.type,
+            airline: route.airline,
+            airlineid: route.airlineid,
+            sourceairport: route.sourceairport,
+            destinationairport: route.destinationairport,
+            stops: route.stops,
+            equipment: route.equipment,
+            schedule: route.schedule.map do |schedule_detail|
+              {
+                day: schedule_detail.day,
+                utc: schedule_detail.utc,
+                flight: schedule_detail.flight
+              }
+            end,
+            distance: route.distance
+          }
+        end
+        render json: formatted_routes
+      rescue StandardError => e
+        render json: { error: e.message }, status: :internal_server_error
       end
 
       private
@@ -87,7 +110,8 @@ module Api
       end
 
       def route_params
-        params.require(:route).permit(:id, :type, :airline, :airlineid, :sourceairport, :destinationairport, :stops, :equipment, :distance, schedule: [:day, :utc, :flight])
+        params.require(:route).permit(:id, :type, :airline, :airlineid, :sourceairport, :destinationairport,
+                                      :stops, :equipment, :distance, schedule: %i[day utc flight])
       end
     end
   end
