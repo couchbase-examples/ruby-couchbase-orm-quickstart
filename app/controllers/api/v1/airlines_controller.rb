@@ -77,20 +77,7 @@ module Api
       # GET /api/v1/airlines/list
       def index
         airlines = Airline.all
-        airlines.each do |foo|
-          puts foo
-        end
-        formatted_airlines = airlines.map do |airline|
-          {
-            id: airline.id,
-            name: airline.name,
-            iata: airline.iata,
-            icao: airline.icao,
-            callsign: airline.callsign,
-            country: airline.country
-          }
-        end
-        render json: formatted_airlines
+        render json: airlines.map { |airline| airline.attributes.except('id') }, status: :ok
       rescue StandardError => e
         render json: { error: e.message }, status: :internal_server_error
       end

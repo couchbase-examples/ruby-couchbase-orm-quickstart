@@ -76,23 +76,7 @@ module Api
       # GET /api/v1/airports/list
       def index
         airports = Airport.all
-        formatted_airports = airports.map do |airport|
-          {
-            id: airport.id,
-            airportname: airport.airportname,
-            city: airport.city,
-            country: airport.country,
-            faa: airport.faa,
-            icao: airport.icao,
-            tz: airport.tz,
-            geo: {
-              lat: airport.geo&.lat,
-              lon: airport.geo&.lon,
-              alt: airport.geo&.alt
-            }
-          }
-        end
-        render json: formatted_airports
+        render json: airports.map { |airport| airport.attributes.except('id') }, status: :ok
       rescue StandardError => e
         render json: { error: e.message }, status: :internal_server_error
       end

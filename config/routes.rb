@@ -13,6 +13,7 @@ Rails.application.routes.draw do
       delete 'airlines/:id', to: 'airlines#destroy'
 
       # Airports resource routes
+      get 'airports/list', to: 'airports#index'
       get 'airports/direct-connections', to: 'airports#direct_connections'
       get 'airports/:id', to: 'airports#show'
       post 'airports/:id', to: 'airports#create'
@@ -20,6 +21,7 @@ Rails.application.routes.draw do
       delete 'airports/:id', to: 'airports#destroy'
 
       # Routes resource routes
+      get 'routes/list', to: 'routes#index'
       get 'routes/:id', to: 'routes#show'
       post 'routes/:id', to: 'routes#create'
       put 'routes/:id', to: 'routes#update'
