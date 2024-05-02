@@ -76,7 +76,7 @@ module Api
 
       # GET /api/v1/airlines/list
       def index
-        airlines = Airline.all
+        airlines = Airline.all.offset(0).limit(10)
         render json: airlines.map { |airline| airline.attributes.except('id') }, status: :ok
       rescue StandardError => e
         render json: { error: e.message }, status: :internal_server_error

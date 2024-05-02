@@ -75,8 +75,8 @@ module Api
 
       # GET /api/v1/airports/list
       def index
-        airports = Airport.all
-        render json: airports.map { |airport| airport.attributes.except('id') }, status: :ok
+        airports = Airport.pluck(:id, :airportname, :city, :country, :faa, :icao, :tz, :geo)
+        render json: airports
       rescue StandardError => e
         render json: { error: e.message }, status: :internal_server_error
       end
