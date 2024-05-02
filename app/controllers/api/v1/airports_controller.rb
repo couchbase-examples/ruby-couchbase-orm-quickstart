@@ -75,10 +75,37 @@ module Api
 
       # GET /api/v1/airports/list
       def index
-        airports = Airport.pluck(:id, :airportname, :city, :country, :faa, :icao, :tz, :geo)
-        render json: airports
-      rescue StandardError => e
-        render json: { error: e.message }, status: :internal_server_error
+        country = params[:country]
+        page = params[:page].to_i || 1
+        per_page = params[:per_page].to_i || 10
+
+        offset = (page - 1) * per_page
+
+        begin
+          airports = if country.present?
+                       Airport.where(country:)
+                     else
+                       Airport.all
+                     end
+                     .pluck(:airportname, :city, :country, :faa, :geo, :icao, :id, :tz)
+
+          formatted_airports = airports.map do |airport|
+            {
+              airportname: airport[0],
+              city: airport[1],
+              country: airport[2],
+              faa: airport[3],
+              geo: airport[4],
+              icao: airport[5],
+              id: airport[6],
+              tz: airport[7]
+            }
+          end
+
+          render json: formatted_airports
+        rescue StandardError => e
+          render json: { error: 'Internal server error', message: e.message }, status: :internal_server_error
+        end
       end
 
       private

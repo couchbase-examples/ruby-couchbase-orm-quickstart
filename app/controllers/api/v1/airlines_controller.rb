@@ -76,10 +76,71 @@ module Api
 
       # GET /api/v1/airlines/list
       def index
-        airlines = Airline.all.offset(0).limit(10)
-        render json: airlines.map { |airline| airline.attributes.except('id') }, status: :ok
+        country = params[:country]
+        page = params[:page].to_i || 1
+        per_page = params[:per_page].to_i || 10
+
+        offset = (page - 1) * per_page
+
+        airlines = if country.present?
+                     Airline.where(country:)
+                   else
+                     Airline.all
+                   end
+                   .pluck(:callsign, :country, :iata, :icao, :id, :name)
+        #  .order(:name)
+        #  .offset(offset)
+        #  .limit(per_page)
+
+        formatted_airlines = airlines.map do |airline|
+          {
+            callsign: airline[0],
+            country: airline[1],
+            iata: airline[2],
+            icao: airline[3],
+            id: airline[4],
+            name: airline[5]
+          }
+        end
+
+        render json: formatted_airlines
+      end
+
+      # GET /api/v1/airlines/to-airport
+      def to_airport
+        raise ArgumentError, 'Destination airport is missing' unless params[:destination_airport].present?
+
+        destination_airport = params[:destination_airport]
+        page = params[:page].to_i || 1
+        per_page = params[:per_page].to_i || 10
+
+        offset = (page - 1) * per_page
+
+        airline_ids = Route.where(destinationairport: destination_airport)
+                           #  .distinct(:airlineid)
+                           .pluck(:airlineid)
+
+        airlines = Airline.where(id: airline_ids)
+                          .pluck(:callsign, :country, :iata, :icao, :id, :name)
+        # .offset(offset)
+        # .limit(per_page)
+
+        formatted_airlines = airlines.map do |airline|
+          {
+            callsign: airline[0],
+            country: airline[1],
+            iata: airline[2],
+            icao: airline[3],
+            id: airline[4],
+            name: airline[5]
+          }
+        end
+
+        render json: formatted_airlines
+      rescue ArgumentError => e
+        render json: { error: 'Invalid request', message: e.message }, status: :bad_request
       rescue StandardError => e
-        render json: { error: e.message }, status: :internal_server_error
+        render json: { error: 'Internal server error', message: e.message }, status: :internal_server_error
       end
 
       private
