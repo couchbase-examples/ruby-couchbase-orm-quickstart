@@ -11,14 +11,14 @@ const config: Config = {
   url: 'https://couchbase-examples.github.io/',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/ruby-couchbase-orm-quickstart/',
+  baseUrl: '/',
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
   organizationName: 'couchbase-examples', // Usually your GitHub org/user name.
   projectName: 'ruby-couchbase-orm-quickstart', // Usually your repo name.
 
-  onBrokenLinks: 'throw',
+  onBrokenLinks: 'throw', // TODO: 'throw' when all links are fixed
   onBrokenMarkdownLinks: 'warn',
 
   // Even if you don't use internationalization, you can use this field to set
