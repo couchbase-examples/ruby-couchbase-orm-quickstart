@@ -21,10 +21,12 @@ jobs:
       - name: Install dependencies
         run: |
           cd docusaurus
+          pwd
           yarn install
       - name: Build website
         run: |
           cd docusaurus
+          pwd
           yarn build
       - name: Upload Build Artifact
         uses: actions/upload-pages-artifact@v3
