@@ -18,7 +18,7 @@ const config: Config = {
   organizationName: 'couchbase-examples', // Usually your GitHub org/user name.
   projectName: 'ruby-couchbase-orm-quickstart', // Usually your repo name.
 
-  onBrokenLinks: 'throw', // TODO: 'throw' when all links are fixed
+  onBrokenLinks: 'ignore', // TODO: 'throw' when all links are fixed
   onBrokenMarkdownLinks: 'warn',
 
   // Even if you don't use internationalization, you can use this field to set

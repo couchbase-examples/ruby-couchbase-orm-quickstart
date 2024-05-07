@@ -1,3 +1,6 @@
+# Lock files
+package-lock.json
+
 # Vs Code
 .vscode/
 
