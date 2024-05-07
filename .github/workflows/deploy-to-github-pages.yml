@@ -1,49 +1,49 @@
-name: Deploy to GitHub Pages
+# name: Deploy to GitHub Pages
 
-on:
-  push:
-    branches:
-      - main
-      - docs/docusaurus
+# on:
+#   push:
+#     branches:
+#       - main
+#       - docs/docusaurus
 
-jobs:
-  build:
-    name: Build Docusaurus
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+# jobs:
+#   build:
+#     name: Build Docusaurus
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v4
+#         with:
+#           fetch-depth: 0
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 18
+#       - uses: actions/setup-node@v4
+#         with:
+#           node-version: 18
 
-      - name: Install dependencies
-        run: |
-          cd docusaurus
-          yarn install
-      - name: Build website
-        run: |
-          cd docusaurus
-          yarn build
+#       - name: Install dependencies
+#         run: |
+#           cd docusaurus
+#           yarn install
+#       - name: Build website
+#         run: |
+#           cd docusaurus
+#           yarn build
 
-      - name: Upload Build Artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: docusaurus/build
+#       - name: Upload Build Artifact
+#         uses: actions/upload-pages-artifact@v3
+#         with:
+#           path: docusaurus/build
 
-  deploy:
-    name: Deploy to GitHub Pages
-    needs: build
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+#   deploy:
+#     name: Deploy to GitHub Pages
+#     needs: build
+#     permissions:
+#       pages: write
+#       id-token: write
+#     environment:
+#       name: github-pages
+#       url: ${{ steps.deployment.outputs.page_url }}
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Deploy to GitHub Pages
+#         id: deployment
+#         uses: actions/deploy-pages@v4
