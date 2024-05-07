@@ -1,2 +1,6 @@
 # Vs Code
 .vscode/
+
+# Lock files
+package-lock.json
+yarn.lock
