@@ -72,6 +72,31 @@ module Api
         render json: { error: 'Internal server error', message: e.message }, status: :internal_server_error
       end
 
+      def create_with_validations
+        @hotel = Hotel.new(hotel_params)
+        if @hotel.save
+          render json: @hotel, status: :created
+        else
+          render json: { errors: @hotel.errors.full_messages }, status: :unprocessable_entity
+        end
+      end
+
+      def update_with_validations
+        if @hotel.update(hotel_params)
+          render json: @hotel
+        else
+          render json: { errors: @hotel.errors.full_messages }, status: :unprocessable_entity
+        end
+      end
+
+      def destroy_with_callback
+        if @hotel.destroy
+          head :no_content
+        else
+          render json: { errors: @hotel.errors.full_messages }, status: :unprocessable_entity
+        end
+      end
+
       private
 
       def set_hotel

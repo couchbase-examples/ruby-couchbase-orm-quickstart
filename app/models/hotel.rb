@@ -1,6 +1,3 @@
-# frozen_string_literal: true
-
-# app/models/hotel.rb
 class Hotel < CouchbaseOrm::Base
   attribute :title, :string
   attribute :name, :string
@@ -31,7 +28,17 @@ class Hotel < CouchbaseOrm::Base
   attribute :created_at, :datetime, precision: 6
   attribute :updated_at, :datetime, precision: 6
 
+  validates :name, presence: true, uniqueness: true
+  validates :address, presence: true
+  validates :phone, presence: true
+  validates :type, inclusion: { in: ['hotel', 'motel', 'resort'] }
+  validates :url, format: { with: URI.regexp, message: 'must be a valid URL' }
+  validates :description, length: { maximum: 500 }
+
+  before_create :set_alias
   before_save :set_timestamps
+  after_create :send_welcome_email
+  before_destroy :check_reviews
 
   private
 
@@ -40,19 +47,15 @@ class Hotel < CouchbaseOrm::Base
     self.created_at = current_time if new_record?
     self.updated_at = current_time
   end
-end
 
-# app/models/geo_coordinates.rb
-class GeoCoordinates < CouchbaseOrm::NestedDocument
-  attribute :lat, :float
-  attribute :lon, :float
-  attribute :accuracy, :string
-end
+  def send_welcome_email
+    # Code to send welcome email after hotel creation
+  end
 
-# app/models/review.rb
-class Review < CouchbaseOrm::NestedDocument
-  attribute :content, :string
-  attribute :ratings, :hash
-  attribute :author, :string
-  attribute :date, :datetime
+  def check_reviews
+    if reviews.any?
+      errors.add(:base, 'Cannot delete hotel with existing reviews')
+      throw :abort
+    end
+  end
 end
