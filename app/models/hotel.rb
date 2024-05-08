@@ -1,4 +1,67 @@
+class GeoCoordinates < CouchbaseOrm::NestedDocument
+  attribute :lat, :float
+  attribute :lon, :float
+  attribute :accuracy, :string
+
+  validates :lat, presence: true, numericality: { greater_than_or_equal_to: -90, less_than_or_equal_to: 90 }
+  validates :lon, presence: true, numericality: { greater_than_or_equal_to: -180, less_than_or_equal_to: 180 }
+  validates :accuracy, presence: true
+end
+
+class Review < CouchbaseOrm::NestedDocument
+  attribute :author, :string
+  attribute :content, :string
+  attribute :ratings, :integer
+  attribute :date, :datetime, precision: 6
+
+  validates :author, :content, :rating, presence: true
+  validates :ratings, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 5 }
+end
+
 class Hotel < CouchbaseOrm::Base
+  before_create :do_something_before_create
+  after_create :do_something_after_create
+  before_save :do_something_before_save
+  after_save :do_something_after_save
+  before_update :do_something_before_update
+  after_update :do_something_after_update
+  before_destroy :do_something_before_destroy
+  after_destroy :do_something_after_destroy
+
+  private
+
+  def do_something_before_create
+    puts "Before create: #{self}"
+  end
+
+  def do_something_after_create
+    puts "After create: #{self}"
+  end
+
+  def do_something_before_save
+    puts "Before save: #{self}"
+  end
+
+  def do_something_after_save
+    puts "After save: #{self}"
+  end
+
+  def do_something_before_update
+    puts "Before update: #{self}"
+  end
+
+  def do_something_after_update
+    puts "After update: #{self}"
+  end
+
+  def do_something_before_destroy
+    puts "Before destroy: #{self}"
+  end
+
+  def do_something_after_destroy
+    puts "After destroy: #{self}"
+  end
+
   attribute :title, :string
   attribute :name, :string
   attribute :address, :string
@@ -28,34 +91,21 @@ class Hotel < CouchbaseOrm::Base
   attribute :created_at, :datetime, precision: 6
   attribute :updated_at, :datetime, precision: 6
 
-  validates :name, presence: true, uniqueness: true
-  validates :address, presence: true
-  validates :phone, presence: true
-  validates :type, inclusion: { in: ['hotel', 'motel', 'resort'] }
-  validates :url, format: { with: URI.regexp, message: 'must be a valid URL' }
-  validates :description, length: { maximum: 500 }
-
-  before_create :set_alias
-  before_save :set_timestamps
-  after_create :send_welcome_email
-  before_destroy :check_reviews
-
-  private
+  # Validations
+  validates :title, :name, :address, :phone, :email, :fax, :url, presence: true
+  validates :email, format: { with: URI::MailTo::EMAIL_REGEXP, message: 'must be a valid email address' }
+  validates :phone, format: { with: /\A\d{10}\z/, message: 'must be a valid 10-digit phone number' }
+  validates :fax, format: { with: /\A\d{10}\z/, message: 'must be a valid 10-digit fax number' }
+  validates :url, format: { with: URI::DEFAULT_PARSER.make_regexp, message: 'must be a valid URL' }
+  validates :title, :name, :address, :city, :state, :country, length: { maximum: 255 }
+  # validates :title, :name, uniqueness: true
+  validates :price, numericality: { greater_than_or_equal_to: 0 }
+  validates :vacancy, inclusion: { in: [true, false] }
+  validates :public_likes, exclusion: { in: [nil] }
 
   def set_timestamps
     current_time = Time.now
     self.created_at = current_time if new_record?
     self.updated_at = current_time
-  end
-
-  def send_welcome_email
-    # Code to send welcome email after hotel creation
-  end
-
-  def check_reviews
-    if reviews.any?
-      errors.add(:base, 'Cannot delete hotel with existing reviews')
-      throw :abort
-    end
   end
 end

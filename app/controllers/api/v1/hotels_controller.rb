@@ -72,6 +72,16 @@ module Api
         render json: { error: 'Internal server error', message: e.message }, status: :internal_server_error
       end
 
+      def index
+        begin
+          @hotels = Hotel.all
+          formatted_hotels = @hotels.map { |hotel| hotel.attributes.except('id') }
+          render json: formatted_hotels, status: :ok
+        rescue StandardError => e
+          render json: { error: 'Internal server error', message: e.message }, status: :internal_server_error
+        end
+      end
+
       def create_with_validations
         @hotel = Hotel.new(hotel_params)
         if @hotel.save
