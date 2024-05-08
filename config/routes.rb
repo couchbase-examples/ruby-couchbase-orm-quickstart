@@ -26,6 +26,14 @@ Rails.application.routes.draw do
       post 'routes/:id', to: 'routes#create'
       put 'routes/:id', to: 'routes#update'
       delete 'routes/:id', to: 'routes#destroy'
+
+      # Hotel
+      get 'hotels/list', to: 'hotels#index'
+      get 'hotels/:id', to: 'hotels#show'
+      post 'hotels/:id', to: 'hotels#create'
+      put 'hotels/:id', to: 'hotels#update'
+      delete 'hotels/:id', to: 'hotels#destroy'
+
     end
   end
 end
