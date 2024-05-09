@@ -38,6 +38,7 @@ Rails.application.routes.draw do
       get 'hotels/active_hotels', to: 'hotels#active_hotels'
       get 'hotels/find_by_name_and_price', to: 'hotels#find_hotels_by_name_and_price'
       get 'hotels/find_by_email_domain', to: 'hotels#find_hotels_by_email_domain'
+      get '/hotels/create_and_update', to: 'hotels#create_and_update'
     end
   end
 end

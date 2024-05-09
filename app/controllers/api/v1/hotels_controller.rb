@@ -87,6 +87,8 @@ module Api
         else
           render json: { errors: @hotel.errors.full_messages }, status: :unprocessable_entity
         end
+      rescue StandardError => e
+        render json: { error: e.message }, status: :internal_server_error
       end
 
       def update_with_validations
@@ -95,6 +97,8 @@ module Api
         else
           render json: { errors: @hotel.errors.full_messages }, status: :unprocessable_entity
         end
+      rescue StandardError => e
+        render json: { error: e.message }, status: :internal_server_error
       end
 
       def destroy_with_callback
@@ -103,18 +107,24 @@ module Api
         else
           render json: { errors: @hotel.errors.full_messages }, status: :unprocessable_entity
         end
+      rescue StandardError => e
+        render json: { error: e.message }, status: :internal_server_error
       end
 
       # GET /hotels/:id
       def find_hotel_by_id
         hotel = Hotel.find('hotel_id_123')
         render json: hotel
+      rescue StandardError => e
+        render json: { error: e.message }, status: :internal_server_error
       end
 
       # GET /hotels/find_by_name
       def find_hotel_by_name
         hotel = Hotel.find_by(name: 'Windy Harbour Farm Hotel')
         render json: hotel
+      rescue StandardError => e
+        render json: { error: e.message }, status: :internal_server_error
       end
 
       # GET /hotels/active_hotels
@@ -123,12 +133,16 @@ module Api
         formatted_hotels = active_hotels.map { |hotel| hotel.attributes.except('id') }
         # render just their names and total count
         render json: { hotels: formatted_hotels.map { |hotel| hotel['name'] }, total: formatted_hotels.count }
+      rescue StandardError => e
+        render json: { error: e.message }, status: :internal_server_error
       end
 
       # GET /hotels/find_by_name_and_price
       def find_hotels_by_name_and_price
         hotels = Hotel.where("LOWER(name) LIKE '%hostel%' AND price IS NOT NULL").where(vacancy: true)
         render json: { hotels: hotels.map { |hotel| hotel.attributes.except('id') }, total: hotels.count }
+      rescue StandardError => e
+        render json: { error: e.message }, status: :internal_server_error
       end
 
       # GET /hotels/find_by_email_domain
@@ -137,6 +151,51 @@ module Api
         formatted_hotels = hotels.map { |hotel| hotel.attributes.except('id') }
         render json: formatted_hotels, status: :ok
         # render json: { hotels: hotels.map { |hotel| hotel.attributes.except('id') }, total: hotels.count }
+      rescue StandardError => e
+        render json: { error: e.message }, status: :internal_server_error
+      end
+
+      # GET /hotels/create_and_update
+      def create_and_update
+        # Create a new hotel document
+        hotel = Hotel.new(
+          title: 'Glossop',
+          name: 'Windy Harbour Farm Hotel',
+          address: 'Woodhead Road',
+          phone: '+44 1457 853107',
+          url: 'http://www.peakdistrict-hotel.co.uk/',
+          geo: { lat: 53.46327, lon: -1.943125, accuracy: 'ROOFTOP' },
+          type: 'hotel',
+          country: 'United Kingdom',
+          city: 'Padfield',
+          vacancy: false,
+          description: 'Woodhead Rd, Glossop',
+          free_internet: true,
+          free_breakfast: false,
+          free_parking: false
+        )
+
+        # Save the hotel document
+        hotel.save
+
+        # Increment the price by 100
+        hotel.increment(:price, 100)
+
+        # Decrement the price by 50
+        hotel.decrement(:price, 50)
+
+        # Append additional information to the description
+        hotel.append(:description, ', additional information')
+
+        # Prepend additional description to the existing description
+        hotel.prepend(:description, 'Additional description, ')
+
+        # Update the expiration time
+        hotel.touch
+
+        render json: hotel
+      rescue StandardError => e
+        render json: { error: e.message }, status: :internal_server_error
       end
 
       private
