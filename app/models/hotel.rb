@@ -104,10 +104,9 @@ class Hotel < CouchbaseOrm::Base
   validates :public_likes, exclusion: { in: [nil] }
 
   validate :custom_validation
-  def custom_validation
-    return unless email.include?('rhossilibunkhouse.com')
 
-    errors.add(:email, 'cannot be from rhossilibunkhouse.com')
+  def custom_validation
+    errors.add(:title, 'cannot be funny')
   end
 
   def set_timestamps

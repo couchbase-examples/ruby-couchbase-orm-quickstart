@@ -73,13 +73,11 @@ module Api
       end
 
       def index
-        begin
-          @hotels = Hotel.all
-          formatted_hotels = @hotels.map { |hotel| hotel.attributes.except('id') }
-          render json: formatted_hotels, status: :ok
-        rescue StandardError => e
-          render json: { error: 'Internal server error', message: e.message }, status: :internal_server_error
-        end
+        @hotels = Hotel.all
+        formatted_hotels = @hotels.map { |hotel| hotel.attributes.except('id') }
+        render json: formatted_hotels, status: :ok
+      rescue StandardError => e
+        render json: { error: 'Internal server error', message: e.message }, status: :internal_server_error
       end
 
       def create_with_validations
@@ -105,6 +103,40 @@ module Api
         else
           render json: { errors: @hotel.errors.full_messages }, status: :unprocessable_entity
         end
+      end
+
+      # GET /hotels/:id
+      def find_hotel_by_id
+        hotel = Hotel.find('hotel_id_123')
+        render json: hotel
+      end
+
+      # GET /hotels/find_by_name
+      def find_hotel_by_name
+        hotel = Hotel.find_by(name: 'Windy Harbour Farm Hotel')
+        render json: hotel
+      end
+
+      # GET /hotels/active_hotels
+      def active_hotels
+        active_hotels = Hotel.where(vacancy: true)
+        formatted_hotels = active_hotels.map { |hotel| hotel.attributes.except('id') }
+        # render just their names and total count
+        render json: { hotels: formatted_hotels.map { |hotel| hotel['name'] }, total: formatted_hotels.count }
+      end
+
+      # GET /hotels/find_by_name_and_price
+      def find_hotels_by_name_and_price
+        hotels = Hotel.where("LOWER(name) LIKE '%hostel%' AND price IS NOT NULL").where(vacancy: true)
+        render json: { hotels: hotels.map { |hotel| hotel.attributes.except('id') }, total: hotels.count }
+      end
+
+      # GET /hotels/find_by_email_domain
+      def find_hotels_by_email_domain
+        hotels = Hotel.where(email: /co.uk/)
+        formatted_hotels = hotels.map { |hotel| hotel.attributes.except('id') }
+        render json: formatted_hotels, status: :ok
+        # render json: { hotels: hotels.map { |hotel| hotel.attributes.except('id') }, total: hotels.count }
       end
 
       private
