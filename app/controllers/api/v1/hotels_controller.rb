@@ -198,6 +198,15 @@ module Api
         render json: { error: e.message }, status: :internal_server_error
       end
 
+      # GET /hotels/find_by_name_n1ql
+      def find_hotels_by_name_n1ql
+        puts "hello"
+        hotels = Hotel.find_by_name_n1ql('Windy Harbour Farm Hotel')
+        render json: hotels.map { |hotel| hotel.attributes.except('id') }, status: :ok
+      rescue StandardError => e
+        render json: { error: e.message }, status: :internal_server_error
+      end
+
       private
 
       def set_hotel

@@ -28,6 +28,8 @@ class Hotel < CouchbaseOrm::Base
   before_destroy :do_something_before_destroy
   after_destroy :do_something_after_destroy
 
+  before_save :encrypt_address
+
   private
 
   def do_something_before_create
@@ -64,7 +66,7 @@ class Hotel < CouchbaseOrm::Base
 
   attribute :title, :string
   attribute :name, :string
-  attribute :address, :string
+  attribute :address, :encrypted
   attribute :directions, :string
   attribute :phone, :string
   attribute :tollfree, :string
@@ -99,19 +101,35 @@ class Hotel < CouchbaseOrm::Base
   validates :url, format: { with: URI::DEFAULT_PARSER.make_regexp, message: 'must be a valid URL' }
   validates :title, :name, :address, :city, :state, :country, length: { maximum: 255 }
   # validates :title, :name, uniqueness: true
-  validates :price, numericality: { greater_than_or_equal_to: 0 }
+  # validates :price, numericality: { greater_than_or_equal_to: 0 } # its a string
   validates :vacancy, inclusion: { in: [true, false] }
   validates :public_likes, exclusion: { in: [nil] }
 
   validate :custom_validation
 
+  n1ql :find_by_name_n1ql, 'SELECT * FROM hotels WHERE name = $1'
+
   def custom_validation
-    errors.add(:title, 'cannot be funny')
+    if title.include?('funny')
+      errors.add(:title, 'cannot be funny')
+    end
   end
 
   def set_timestamps
     current_time = Time.now
     self.created_at = current_time if new_record?
     self.updated_at = current_time
+  end
+
+  def encrypt_address
+    self.address = encrypt(self.address) if address_changed?
+  end
+
+  def encrypt(data)
+    # Implement your encryption logic here
+    # For example, using a simple XOR encryption
+    key = "secret_key"
+    encrypted_data = data.chars.map { |c| (c.ord ^ key.ord).chr }.join
+    encrypted_data
   end
 end

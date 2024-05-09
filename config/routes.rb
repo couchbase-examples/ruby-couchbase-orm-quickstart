@@ -33,12 +33,15 @@ Rails.application.routes.draw do
       # post 'hotels/:id', to: 'hotels#create'
       # put 'hotels/:id', to: 'hotels#update'
       # delete 'hotels/:id', to: 'hotels#destroy'
-      get 'hotels/find_hotel_by_id', to: 'hotels#find_hotel_by_id'
-      get 'hotels/find_hotel_by_name', to: 'hotels#find_hotel_by_name'
-      get 'hotels/active_hotels', to: 'hotels#active_hotels'
-      get 'hotels/find_by_name_and_price', to: 'hotels#find_hotels_by_name_and_price'
-      get 'hotels/find_by_email_domain', to: 'hotels#find_hotels_by_email_domain'
-      get '/hotels/create_and_update', to: 'hotels#create_and_update'
+      # get 'hotels/find_by_id', to: 'hotels#find_hotel_by_id'
+      # get 'hotels/find_by_name', to: 'hotels#find_hotel_by_name'
+      # get 'hotels/active_hotels', to: 'hotels#active_hotels'
+      # get 'hotels/find_by_name_and_price', to: 'hotels#find_hotels_by_name_and_price'
+      # get 'hotels/find_by_email_domain', to: 'hotels#find_hotels_by_email_domain'
+      # get '/hotels/create_and_update', to: 'hotels#create_and_update'
+
+      # n1ql
+      get '/hotels/find_by_name_n1ql', to: 'hotels#find_hotels_by_name_n1ql'
     end
   end
 end
