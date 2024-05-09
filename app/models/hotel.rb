@@ -103,6 +103,13 @@ class Hotel < CouchbaseOrm::Base
   validates :vacancy, inclusion: { in: [true, false] }
   validates :public_likes, exclusion: { in: [nil] }
 
+  validate :custom_validation
+  def custom_validation
+    return unless email.include?('rhossilibunkhouse.com')
+
+    errors.add(:email, 'cannot be from rhossilibunkhouse.com')
+  end
+
   def set_timestamps
     current_time = Time.now
     self.created_at = current_time if new_record?
