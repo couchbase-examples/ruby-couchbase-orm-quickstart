@@ -108,4 +108,4 @@ Views in CouchbaseOrm provide a flexible and efficient way to query and aggregat
 
 It's important to design your views carefully, considering the querying patterns and performance requirements of your application. Proper indexing and querying can significantly improve the performance and scalability of your application.
 
-In the next section, we'll explore how to work with embedded documents in CouchbaseOrm, allowing you to model complex data structures within a single document.
+In the next section, we'll explore how to work with nested documents in CouchbaseOrm, allowing you to model complex data structures within a single document.

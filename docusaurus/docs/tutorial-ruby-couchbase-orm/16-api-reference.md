@@ -105,7 +105,7 @@ This section provides a comprehensive reference of the CouchbaseOrm API, includi
 
 ## 16.7. CouchbaseOrm::NestedDocument
 
-`CouchbaseOrm::NestedDocument` represents an embedded document within a parent document.
+`CouchbaseOrm::NestedDocument` represents an nested document within a parent document.
 
 - `attribute(name, type, options = {})`: Defines an attribute for the nested document.
 - `validate`: Validates the nested document's attributes.

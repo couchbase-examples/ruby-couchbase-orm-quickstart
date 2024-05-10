@@ -42,7 +42,7 @@ Couchbase ORM offers a wide range of features to make working with Couchbase Ser
 
 9. **Views**: Create and query Couchbase views to efficiently retrieve data based on specific criteria.
 
-10. **Embedded Documents**: Embed related documents within a parent document for denormalized data modeling.
+10. **Nested Documents**: Embed related documents within a parent document for denormalized data modeling.
 
 These are just a few of the many features offered by Couchbase ORM. Throughout this documentation, we'll explore these features in-depth and provide examples of how to use them in your Ruby applications.
 
