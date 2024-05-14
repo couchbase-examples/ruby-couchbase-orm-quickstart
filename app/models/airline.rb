@@ -25,6 +25,6 @@ class Airline < CouchbaseOrm::Base
   n1ql :to_airport, query_fn: proc { |bucket, values, options|
                                 # limit = options[:limit] || 10
                                 # offset = options[:offset] || 0
-                                cluster.query("SELECT raw META(air).id FROM (SELECT DISTINCT META(airline).id AS airlineId FROM `#{bucket.name}` AS route JOIN `#{bucket.name}` AS airline ON route.airlineid = META(airline).id WHERE route.destinationairport = 'JFK') AS subquery JOIN `#{bucket.name}` AS air ON META(air).id = subquery.airlineId LIMIT 10 OFFSET 0", options)
+                                cluster.query("SELECT raw META(air).id FROM (SELECT DISTINCT META(airline).id AS airlineId FROM `#{bucket.name}` AS route JOIN `#{bucket.name}` AS airline ON route.airlineid = META(airline).id WHERE route.destinationairport = #{quote(values[0])}) AS subquery JOIN `#{bucket.name}` AS air ON META(air).id = subquery.airlineId LIMIT 10 OFFSET 0", options)
                               }
 end
