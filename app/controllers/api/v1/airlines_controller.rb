@@ -81,12 +81,7 @@ module Api
         offset = params[:offset] || 0
 
         begin
-          airlines = if country.present?
-                       Airline.list_by_country(key: [country, limit, offset])
-                     else
-                       # TODO: Implement pagination
-                       Airline.all
-                     end
+          airlines = Airline.list_by_country_or_all(key: [country, limit, offset])
 
           airlines = airlines.pluck(:callsign, :country, :iata, :icao, :name)
           formatted_airlines = airlines.map do |airline|
@@ -115,7 +110,6 @@ module Api
         limit = params[:limit] || 10
         offset = params[:offset] || 0
 
-        puts "Destination airport: #{destination_airport}, limit: #{limit}, offset: #{offset}"
         airlines = Airline.to_airport(key: [destination_airport, limit, offset])
                           .pluck(:callsign, :country, :iata, :icao, :name)
 

@@ -9,7 +9,6 @@ class Airline < CouchbaseOrm::Base
   attribute :iata, :string
   attribute :icao, :string
   attribute :country, :string
-  # attribute :destinationAirportCode, :string
 
   validates :name, presence: true
   validates :callsign, presence: true
@@ -18,8 +17,15 @@ class Airline < CouchbaseOrm::Base
   validates :country, presence: true
 
   # Custom N1QL query to list airlines by country with pagination
-  n1ql :list_by_country, query_fn: proc { |bucket, values, options|
-    cluster.query("SELECT raw meta().id FROM `#{bucket.name}` WHERE type = 'airline' AND country = #{quote(values[0])} LIMIT #{values[1]} OFFSET #{values[2]}", options)
+  n1ql :list_by_country_or_all, query_fn: proc { |bucket, values, options|
+    if values[0].present?
+      country = quote(values[0])
+      query = "SELECT raw meta().id FROM `#{bucket.name}` WHERE type = 'airline' AND country = #{country}"
+    else
+      query = "SELECT raw meta().id FROM `#{bucket.name}` WHERE type = 'airline'"
+    end
+    query += " LIMIT #{values[1]} OFFSET #{values[2]}"
+    cluster.query(query, options)
   }
 
   n1ql :to_airport, query_fn: proc { |bucket, values, options|
