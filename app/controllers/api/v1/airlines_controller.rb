@@ -119,8 +119,7 @@ module Api
             country: airline[1],
             iata: airline[2],
             icao: airline[3],
-            id: airline[4],
-            name: airline[5]
+            name: airline[4]
           }
         end
 
