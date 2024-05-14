@@ -77,9 +77,8 @@ module Api
       # GET /api/v1/airlines/list
       def index
         country = params[:country]
-        page = params[:page].to_i || 1
-        per_page = params[:per_page].to_i || 10
-        offset = (page - 1) * per_page
+        offset = params[:offset].to_i || 0
+        limit = params[:limit].to_i || 10
 
         begin
           airlines = if country.present?
@@ -112,22 +111,11 @@ module Api
         raise ArgumentError, 'Destination airport is missing' unless params[:destinationAirportCode].present?
 
         destination_airport = params[:destinationAirportCode]
-        page = params[:page].to_i || 1
-        per_page = params[:per_page].to_i || 10
+        offset = params[:offset].to_i || 0
+        limit = params[:limit].to_i || 10
 
-        offset = (page - 1) * per_page
-
-        # airline_ids = Route.where(destinationairport: destination_airport)
-        #                    #  .distinct(:airlineid)
-        #                    .pluck(:airlineid)
-
-        # airlines = Airline.where(id: airline_ids)
-        #                   .pluck(:callsign, :country, :iata, :icao, :id, :name)
-
-        airlines = Airline.to_airport(destination_airport, limit: per_page, offset:)
-
-        # .offset(offset)
-        # .limit(per_page)
+        airlines = Airline.to_airport(key: [destination_airport])
+                          .pluck(:callsign, :country, :iata, :icao, :name)
 
         formatted_airlines = airlines.map do |airline|
           {
