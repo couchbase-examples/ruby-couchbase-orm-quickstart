@@ -18,13 +18,11 @@ class Airline < CouchbaseOrm::Base
   validates :country, presence: true
 
   # Custom N1QL query to list airlines by country with pagination
-  n1ql :list_by_country, emit_key: [:country], query_fn: proc { |bucket, values, options|
-    cluster.query("SELECT raw meta().id FROM `#{bucket.name}` WHERE type = 'airline' AND country = #{quote(values[0])} LIMIT 10 OFFSET 0", options)
+  n1ql :list_by_country, query_fn: proc { |bucket, values, options|
+    cluster.query("SELECT raw meta().id FROM `#{bucket.name}` WHERE type = 'airline' AND country = #{quote(values[0])} LIMIT #{values[1]} OFFSET #{values[2]}", options)
   }
 
   n1ql :to_airport, query_fn: proc { |bucket, values, options|
-                                # limit = options[:limit] || 10
-                                # offset = options[:offset] || 0
-                                cluster.query("SELECT raw META(air).id FROM (SELECT DISTINCT META(airline).id AS airlineId FROM `#{bucket.name}` AS route JOIN `#{bucket.name}` AS airline ON route.airlineid = META(airline).id WHERE route.destinationairport = #{quote(values[0])}) AS subquery JOIN `#{bucket.name}` AS air ON META(air).id = subquery.airlineId LIMIT 10 OFFSET 0", options)
-                              }
+    cluster.query("SELECT raw META(air).id FROM (SELECT DISTINCT META(airline).id AS airlineId FROM `#{bucket.name}` AS route JOIN `#{bucket.name}` AS airline ON route.airlineid = META(airline).id WHERE route.destinationairport = #{quote(values[0])}) AS subquery JOIN `#{bucket.name}` AS air ON META(air).id = subquery.airlineId LIMIT #{values[1]} OFFSET #{values[2]}", options)
+  }
 end

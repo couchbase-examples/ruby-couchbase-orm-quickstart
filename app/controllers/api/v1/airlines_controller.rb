@@ -77,13 +77,14 @@ module Api
       # GET /api/v1/airlines/list
       def index
         country = params[:country]
-        offset = params[:offset].to_i || 0
-        limit = params[:limit].to_i || 10
+        limit = params[:limit] || 10
+        offset = params[:offset] || 0
 
         begin
           airlines = if country.present?
-                       Airline.list_by_country(key: [country])
+                       Airline.list_by_country(key: [country, limit, offset])
                      else
+                       # TODO: Implement pagination
                        Airline.all
                      end
 
@@ -111,10 +112,11 @@ module Api
         raise ArgumentError, 'Destination airport is missing' unless params[:destinationAirportCode].present?
 
         destination_airport = params[:destinationAirportCode]
-        offset = params[:offset].to_i || 0
-        limit = params[:limit].to_i || 10
+        limit = params[:limit] || 10
+        offset = params[:offset] || 0
 
-        airlines = Airline.to_airport(key: [destination_airport])
+        puts "Destination airport: #{destination_airport}, limit: #{limit}, offset: #{offset}"
+        airlines = Airline.to_airport(key: [destination_airport, limit, offset])
                           .pluck(:callsign, :country, :iata, :icao, :name)
 
         formatted_airlines = airlines.map do |airline|
