@@ -154,123 +154,124 @@ RSpec.describe 'Airlines API', type: :request do
     end
   end
 
-  # describe 'GET /api/v1/airlines/list' do
-  #   let(:country) { 'United States' }
-  #   let(:limit) { '10' }
-  #   let(:offset) { '0' }
-  #   let(:expected_airlines) do
-  #     [
-  #       { 'name' => '40-Mile Air', 'iata' => 'Q5', 'icao' => 'MLA', 'callsign' => 'MILE-AIR',
-  #         'country' => 'United States' },
-  #       { 'name' => 'Texas Wings', 'iata' => 'TQ', 'icao' => 'TXW', 'callsign' => 'TXW', 'country' => 'United States' },
-  #       { 'name' => 'Atifly', 'iata' => 'A1', 'icao' => 'A1F', 'callsign' => 'atifly', 'country' => 'United States' },
-  #       { 'name' => 'Locair', 'iata' => 'ZQ', 'icao' => 'LOC', 'callsign' => 'LOCAIR', 'country' => 'United States' },
-  #       { 'name' => 'SeaPort Airlines', 'iata' => 'K5', 'icao' => 'SQH', 'callsign' => 'SASQUATCH',
-  #         'country' => 'United States' },
-  #       { 'name' => 'Alaska Central Express', 'iata' => 'KO', 'icao' => 'AER', 'callsign' => 'ACE AIR',
-  #         'country' => 'United States' },
-  #       { 'name' => 'AirTran Airways', 'iata' => 'FL', 'icao' => 'TRS', 'callsign' => 'CITRUS',
-  #         'country' => 'United States' },
-  #       { 'name' => 'U.S. Air', 'iata' => '-+', 'icao' => '--+', 'callsign' => nil, 'country' => 'United States' },
-  #       { 'name' => 'PanAm World Airways', 'iata' => 'WQ', 'icao' => 'PQW', 'callsign' => nil,
-  #         'country' => 'United States' },
-  #       { 'name' => 'Bemidji Airlines', 'iata' => 'CH', 'icao' => 'BMJ', 'callsign' => 'BEMIDJI',
-  #         'country' => 'United States' }
-  #     ]
-  #   end
+  describe 'GET /api/v1/airlines/list' do
+    let(:country) { 'United States' }
+    let(:limit) { '10' }
+    let(:offset) { '0' }
+    let(:expected_airlines) do
+      [
+        { 'name' => '40-Mile Air', 'iata' => 'Q5', 'icao' => 'MLA', 'callsign' => 'MILE-AIR',
+          'country' => 'United States' },
+        { 'name' => 'Texas Wings', 'iata' => 'TQ', 'icao' => 'TXW', 'callsign' => 'TXW', 'country' => 'United States' },
+        { 'name' => 'Atifly', 'iata' => 'A1', 'icao' => 'A1F', 'callsign' => 'atifly', 'country' => 'United States' },
+        { 'name' => 'Locair', 'iata' => 'ZQ', 'icao' => 'LOC', 'callsign' => 'LOCAIR', 'country' => 'United States' },
+        { 'name' => 'SeaPort Airlines', 'iata' => 'K5', 'icao' => 'SQH', 'callsign' => 'SASQUATCH',
+          'country' => 'United States' },
+        { 'name' => 'Alaska Central Express', 'iata' => 'KO', 'icao' => 'AER', 'callsign' => 'ACE AIR',
+          'country' => 'United States' },
+        { 'name' => 'AirTran Airways', 'iata' => 'FL', 'icao' => 'TRS', 'callsign' => 'CITRUS',
+          'country' => 'United States' },
+        { 'name' => 'U.S. Air', 'iata' => '-+', 'icao' => '--+', 'callsign' => nil, 'country' => 'United States' },
+        { 'name' => 'PanAm World Airways', 'iata' => 'WQ', 'icao' => 'PQW', 'callsign' => nil,
+          'country' => 'United States' },
+        { 'name' => 'Bemidji Airlines', 'iata' => 'CH', 'icao' => 'BMJ', 'callsign' => 'BEMIDJI',
+          'country' => 'United States' }
+      ]
+    end
 
-  #   it 'returns a list of airlines for a given country' do
-  #     get '/api/v1/airlines/list', params: { country:, limit:, offset: }
+    it 'returns a list of airlines for a given country' do
+      get '/api/v1/airlines/list', params: { country:, limit:, offset: }
 
-  #     expect(response).to have_http_status(:ok)
-  #     expect(response.content_type).to eq('application/json; charset=utf-8')
-  #     expect(JSON.parse(response.body)).to eq(expected_airlines)
-  #   end
-  # end
+      expect(response).to have_http_status(:ok)
+      expect(response.content_type).to eq('application/json; charset=utf-8')
+      expect(JSON.parse(response.body)).to eq(expected_airlines)
+    end
+  end
 
-  # describe 'GET /api/v1/airlines/to-airport' do
-  #   let(:destination_airport_code) { 'MRS' }
-  #   let(:limit) { '10' }
-  #   let(:offset) { '0' }
-  #   let(:expected_airlines) do
-  #     [
-  #       {
-  #         'callsign' => 'AIRFRANS',
-  #         'country' => 'France',
-  #         'iata' => 'AF',
-  #         'icao' => 'AFR',
-  #         'name' => 'Air France'
-  #       },
-  #       {
-  #         'callsign' => 'SPEEDBIRD',
-  #         'country' => 'United Kingdom',
-  #         'iata' => 'BA',
-  #         'icao' => 'BAW',
-  #         'name' => 'British Airways'
-  #       },
-  #       {
-  #         'callsign' => 'AIRLINAIR',
-  #         'country' => 'France',
-  #         'iata' => 'A5',
-  #         'icao' => 'RLA',
-  #         'name' => 'Airlinair'
-  #       },
-  #       {
-  #         'callsign' => 'STARWAY',
-  #         'country' => 'France',
-  #         'iata' => 'SE',
-  #         'icao' => 'SEU',
-  #         'name' => 'XL Airways France'
-  #       },
-  #       {
-  #         'callsign' => 'TWINJET',
-  #         'country' => 'France',
-  #         'iata' => 'T7',
-  #         'icao' => 'TJT',
-  #         'name' => 'Twin Jet'
-  #       },
-  #       {
-  #         'callsign' => 'EASY',
-  #         'country' => 'United Kingdom',
-  #         'iata' => 'U2',
-  #         'icao' => 'EZY',
-  #         'name' => 'easyJet'
-  #       },
-  #       {
-  #         'callsign' => 'AMERICAN',
-  #         'country' => 'United States',
-  #         'iata' => 'AA',
-  #         'icao' => 'AAL',
-  #         'name' => 'American Airlines'
-  #       },
-  #       {
-  #         'callsign' => 'CORSICA',
-  #         'country' => 'France',
-  #         'iata' => 'XK',
-  #         'icao' => 'CCM',
-  #         'name' => 'Corse-Mediterranee'
-  #       }
-  #     ]
-  #   end
+  describe 'GET /api/v1/airlines/to-airport' do
+    let(:destination_airport_code) { 'MRS' }
+    let(:limit) { '10' }
+    let(:offset) { '0' }
+    let(:expected_airlines) do
+      [
+        {
+          'callsign' => 'AIRFRANS',
+          'country' => 'France',
+          'iata' => 'AF',
+          'icao' => 'AFR',
+          'name' => 'Air France'
+        },
+        {
+          'callsign' => 'SPEEDBIRD',
+          'country' => 'United Kingdom',
+          'iata' => 'BA',
+          'icao' => 'BAW',
+          'name' => 'British Airways'
+        },
+        {
+          'callsign' => 'AIRLINAIR',
+          'country' => 'France',
+          'iata' => 'A5',
+          'icao' => 'RLA',
+          'name' => 'Airlinair'
+        },
+        {
+          'callsign' => 'STARWAY',
+          'country' => 'France',
+          'iata' => 'SE',
+          'icao' => 'SEU',
+          'name' => 'XL Airways France'
+        },
+        {
+          'callsign' => 'TWINJET',
+          'country' => 'France',
+          'iata' => 'T7',
+          'icao' => 'TJT',
+          'name' => 'Twin Jet'
+        },
+        {
+          'callsign' => 'EASY',
+          'country' => 'United Kingdom',
+          'iata' => 'U2',
+          'icao' => 'EZY',
+          'name' => 'easyJet'
+        },
+        {
+          'callsign' => 'AMERICAN',
+          'country' => 'United States',
+          'iata' => 'AA',
+          'icao' => 'AAL',
+          'name' => 'American Airlines'
+        },
+        {
+          'callsign' => 'CORSICA',
+          'country' => 'France',
+          'iata' => 'XK',
+          'icao' => 'CCM',
+          'name' => 'Corse-Mediterranee'
+        }
+      ]
+    end
 
-  #   context 'when destinationAirportCode is provided' do
-  #     it 'returns a list of airlines flying to the destination airport' do
-  #       get '/api/v1/airlines/to-airport',
-  #           params: { destinationAirportCode: destination_airport_code, limit:, offset: }
+    context 'when destinationAirportCode is provided' do
+      it 'returns a list of airlines flying to the destination airport' do
+        get '/api/v1/airlines/to-airport',
+            params: { destinationAirportCode: destination_airport_code, limit:, offset: }
 
-  #       expect(response).to have_http_status(:ok)
-  #       expect(response.content_type).to eq('application/json; charset=utf-8')
-  #       expect(JSON.parse(response.body)).to eq(expected_airlines)
-  #     end
-  #   end
+        expect(response).to have_http_status(:ok)
+        expect(response.content_type).to eq('application/json; charset=utf-8')
+        expect(JSON.parse(response.body)).to eq(expected_airlines)
+      end
+    end
 
-  #   context 'when destinationAirportCode is not provided' do
-  #     it 'returns a bad request error' do
-  #       get '/api/v1/airlines/to-airport', params: { limit:, offset: }
+    context 'when destinationAirportCode is not provided' do
+      it 'returns a bad request error' do
+        get '/api/v1/airlines/to-airport', params: { limit:, offset: }
 
-  #       expect(response).to have_http_status(:bad_request)
-  #       expect(JSON.parse(response.body)).to eq({ 'message' => 'Destination airport code is required' })
-  #     end
-  #   end
-  # end
+        expect(response).to have_http_status(:bad_request)
+        expect(JSON.parse(response.body)).to eq({ 'error' => 'Invalid request',
+                                                  'message' => 'Destination airport is missing' })
+      end
+    end
+  end
 end

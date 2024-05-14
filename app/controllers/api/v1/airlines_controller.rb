@@ -79,49 +79,55 @@ module Api
         country = params[:country]
         page = params[:page].to_i || 1
         per_page = params[:per_page].to_i || 10
-
         offset = (page - 1) * per_page
 
-        airlines = if country.present?
-                     Airline.where(country:)
-                   else
-                     Airline.all
-                   end
-                   .pluck(:callsign, :country, :iata, :icao, :id, :name)
-        #  .order(:name)
-        #  .offset(offset)
-        #  .limit(per_page)
+        begin
+          airlines = if country.present?
+                       Airline.list_by_country(country, limit: per_page, offset:)
+                     else
+                       Airline.all
+                              .pluck(:callsign, :country, :iata, :icao, :id, :name)
+                       # .limit(per_page).offset(offset)
+                     end
 
-        formatted_airlines = airlines.map do |airline|
-          {
-            callsign: airline[0],
-            country: airline[1],
-            iata: airline[2],
-            icao: airline[3],
-            id: airline[4],
-            name: airline[5]
-          }
+          formatted_airlines = airlines.map do |airline|
+            {
+              callsign: airline[0],
+              country: airline[1],
+              iata: airline[2],
+              icao: airline[3],
+              id: airline[4],
+              name: airline[5]
+            }
+          end
+
+          render json: formatted_airlines
+        rescue ArgumentError => e
+          render json: { error: 'Invalid request', message: e.message }, status: :bad_request
+        rescue StandardError => e
+          render json: { error: 'Internal server error', message: e.message }, status: :internal_server_error
         end
-
-        render json: formatted_airlines
       end
 
       # GET /api/v1/airlines/to-airport
       def to_airport
-        raise ArgumentError, 'Destination airport is missing' unless params[:destination_airport].present?
+        raise ArgumentError, 'Destination airport is missing' unless params[:destinationAirportCode].present?
 
-        destination_airport = params[:destination_airport]
+        destination_airport = params[:destinationAirportCode]
         page = params[:page].to_i || 1
         per_page = params[:per_page].to_i || 10
 
         offset = (page - 1) * per_page
 
-        airline_ids = Route.where(destinationairport: destination_airport)
-                           #  .distinct(:airlineid)
-                           .pluck(:airlineid)
+        # airline_ids = Route.where(destinationairport: destination_airport)
+        #                    #  .distinct(:airlineid)
+        #                    .pluck(:airlineid)
 
-        airlines = Airline.where(id: airline_ids)
-                          .pluck(:callsign, :country, :iata, :icao, :id, :name)
+        # airlines = Airline.where(id: airline_ids)
+        #                   .pluck(:callsign, :country, :iata, :icao, :id, :name)
+
+        airlines = Airline.to_airport(destination_airport, limit: per_page, offset:)
+
         # .offset(offset)
         # .limit(per_page)
 

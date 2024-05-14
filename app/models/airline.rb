@@ -1,5 +1,8 @@
+# frozen_string_literal: true
+
 require 'couchbase-orm'
 
+# Airline model
 class Airline < CouchbaseOrm::Base
   attribute :name, :string
   attribute :callsign, :string
@@ -14,9 +17,31 @@ class Airline < CouchbaseOrm::Base
   validates :country, presence: true
 
   # Custom N1QL query to list airlines by country with pagination
-  n1ql :by_country, emit_key: :country, query_fn: proc { |bucket, values, options|
-    offset = options.delete(:offset) || 0
-    limit = options.delete(:limit) || 10
-    cluster.query("SELECT * FROM `#{bucket.name}` WHERE type = 'airline' AND country = #{quote(values[0])} ORDER BY name ASC LIMIT #{limit} OFFSET #{offset}")
+  n1ql :list_by_country, emit_key: [:country], query_fn: proc { |bucket, values, options|
+    limit = options[:limit] || 10
+    offset = options[:offset] || 0
+    cluster.query("SELECT airline.callsign, airline.country, airline.iata, airline.icao, META(airline).id AS id, airline.name, airline.type FROM `#{bucket.name}` AS airline WHERE airline.country = $1 LIMIT $2 OFFSET $3", values[0], limit, offset)
+  }
+  # n1ql :by_country,
+  #      "SELECT * FROM `#{bucket.name}` WHERE type = 'airline' AND country = $1 ORDER BY name ASC LIMIT $2 OFFSET $3"
+
+  # SELECT
+  # air.callsign,
+  # air.country,
+  # air.iata,
+  # air.icao,
+  # air.id,
+  # air.name,
+  # air.type
+  # FROM (
+  # SELECT DISTINCT META(airline).id AS airlineId
+  # FROM route
+  # JOIN airline ON route.airlineid = META(airline).id
+  # WHERE route.destinationairport = ?
+  # ) AS subquery
+  # JOIN airline AS air ON META(air).id = subquery.airlineId;
+
+  n1ql :to_airport, emit_key: :icao, query_fn: proc { |_bucket, values, _options|
+    cluster.query("SELECT air.callsign, air.country, air.iata, air.icao, META(air).id, air.name, air.type FROM (SELECT DISTINCT META(airline).id AS airlineId FROM route JOIN airline ON route.airlineid = META(airline).id WHERE route.destinationairport = #{quote(values[0])}) AS subquery JOIN airline AS air ON META(air).id = subquery.airlineId")
   }
 end
