@@ -83,28 +83,26 @@ module Api
 
         begin
           airlines = if country.present?
-                       Airline.list_by_country(country, limit: per_page, offset:)
+                       Airline.list_by_country(key: [country])
                      else
                        Airline.all
-                              .pluck(:callsign, :country, :iata, :icao, :id, :name)
-                       # .limit(per_page).offset(offset)
                      end
 
+          airlines = airlines.pluck(:callsign, :country, :iata, :icao, :name)
           formatted_airlines = airlines.map do |airline|
             {
               callsign: airline[0],
               country: airline[1],
               iata: airline[2],
               icao: airline[3],
-              id: airline[4],
-              name: airline[5]
+              name: airline[4]
             }
           end
-
-          render json: formatted_airlines
+          render json: formatted_airlines, status: :ok
         rescue ArgumentError => e
           render json: { error: 'Invalid request', message: e.message }, status: :bad_request
         rescue StandardError => e
+          # puts e.backtrace.join("\n")
           render json: { error: 'Internal server error', message: e.message }, status: :internal_server_error
         end
       end
