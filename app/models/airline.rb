@@ -17,6 +17,6 @@ class Airline < CouchbaseOrm::Base
   n1ql :by_country, emit_key: :country, query_fn: proc { |bucket, values, options|
     offset = options.delete(:offset) || 0
     limit = options.delete(:limit) || 10
-    cluster.query("SELECT * FROM `#{bucket.name}` WHERE type = 'airline' AND country = #{quote(values[0])} ORDER BY name ASC LIMIT #{limit} OFFSET #{offset}", options)
+    cluster.query("SELECT * FROM `#{bucket.name}` WHERE type = 'airline' AND country = #{quote(values[0])} ORDER BY name ASC LIMIT #{limit} OFFSET #{offset}")
   }
 end
