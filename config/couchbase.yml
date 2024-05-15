@@ -10,3 +10,7 @@ development:
 test:
   <<: *common
   bucket: travel-sample
+
+production:
+  <<: *common
+  bucket: travel-sample
