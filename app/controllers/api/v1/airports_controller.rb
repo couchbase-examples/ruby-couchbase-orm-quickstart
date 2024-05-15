@@ -108,6 +108,25 @@ module Api
         end
       end
 
+      # GET /api/v1/airports/direct-connections
+      def direct_connections
+        raise ArgumentError, 'Source airport is missing' unless params[:sourceAirportCode].present?
+
+        source_airport = params[:sourceAirportCode]
+        limit = params[:limit] || 10
+        offset = params[:offset] || 0
+
+        begin
+          destination_airports = Route.direct_connections(key: [source_airport, limit, offset])
+                                      .pluck(:destinationairport)
+          render json: destination_airports, status: :ok
+        rescue ArgumentError => e
+          render json: { error: 'Invalid request', message: e.message }, status: :bad_request
+        rescue StandardError => e
+          render json: { error: 'Internal server error', message: e.message }, status: :internal_server_error
+        end
+      end
+
       private
 
       def set_airport

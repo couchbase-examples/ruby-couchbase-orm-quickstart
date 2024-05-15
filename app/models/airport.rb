@@ -1,3 +1,8 @@
+# frozen_string_literal: true
+
+require 'couchbase-orm'
+
+# GeoCoordinates nested document
 class GeoCoordinates < CouchbaseOrm::NestedDocument
   attribute :lat, :float
   attribute :lon, :float
@@ -8,6 +13,7 @@ class GeoCoordinates < CouchbaseOrm::NestedDocument
   validates :alt, presence: true, numericality: { greater_than_or_equal_to: -1000, less_than_or_equal_to: 10_000 }
 end
 
+# Airport model
 class Airport < CouchbaseOrm::Base
   attribute :airportname, :string
   attribute :city, :string

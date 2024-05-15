@@ -191,30 +191,30 @@ RSpec.describe 'Airports API', type: :request do
     end
   end
 
-  # describe 'GET /api/v1/airports/direct-connections' do
-  #   let(:destination_airport_code) { 'JFK' }
-  #   let(:limit) { 10 }
-  #   let(:offset) { 0 }
-  #   let(:expected_connections) { %w[DEL LHR EZE ATL CUN MEX LAX SAN SEA SFO] }
+  describe 'GET /api/v1/airports/direct-connections' do
+    let(:destination_airport_code) { 'JFK' }
+    let(:limit) { 10 }
+    let(:offset) { 0 }
+    let(:expected_connections) { %w[DEL LHR EZE ATL CUN MEX LAX SAN SEA SFO] }
 
-  #   context 'when the destination airport code is provided' do
-  #     it 'returns the direct connections' do
-  #       get '/api/v1/airports/direct-connections',
-  #           params: { destinationAirportCode: destination_airport_code, limit: limit, offset: offset }
+    context 'when the destination airport code is provided' do
+      it 'returns the direct connections' do
+        get '/api/v1/airports/direct-connections',
+            params: { destinationAirportCode: destination_airport_code, limit:, offset: }
 
-  #       expect(response).to have_http_status(:ok)
-  #       expect(response.content_type).to eq('application/json; charset=utf-8')
-  #       expect(JSON.parse(response.body)).to eq(expected_connections)
-  #     end
-  #   end
+        expect(response).to have_http_status(:ok)
+        expect(response.content_type).to eq('application/json; charset=utf-8')
+        expect(JSON.parse(response.body)).to eq(expected_connections)
+      end
+    end
 
-  #   context 'when the destination airport code is not provided' do
-  #     it 'returns a bad request error' do
-  #       get '/api/v1/airports/direct-connections'
+    context 'when the destination airport code is not provided' do
+      it 'returns a bad request error' do
+        get '/api/v1/airports/direct-connections'
 
-  #       expect(response).to have_http_status(:bad_request)
-  #       expect(JSON.parse(response.body)).to eq({ 'message' => 'Destination airport code is required' })
-  #     end
-  #   end
-  # end
+        expect(response).to have_http_status(:bad_request)
+        expect(JSON.parse(response.body)).to eq({ 'message' => 'Destination airport code is required' })
+      end
+    end
+  end
 end
