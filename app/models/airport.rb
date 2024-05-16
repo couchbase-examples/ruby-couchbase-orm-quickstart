@@ -2,8 +2,8 @@
 
 require 'couchbase-orm'
 
-# GeoCoordinates nested document
-class GeoCoordinates < CouchbaseOrm::NestedDocument
+# AirportGeoCoordinates nested document
+class AirportGeoCoordinates < CouchbaseOrm::NestedDocument
   attribute :lat, :float
   attribute :lon, :float
   attribute :alt, :integer
@@ -21,7 +21,7 @@ class Airport < CouchbaseOrm::Base
   attribute :faa, :string
   attribute :icao, :string
   attribute :tz, :string
-  attribute :geo, :nested, type: GeoCoordinates
+  attribute :geo, :nested, type: AirportGeoCoordinates
 
   validates :airportname, presence: true
   validates :city, presence: true

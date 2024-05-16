@@ -1,4 +1,4 @@
-class GeoCoordinates < CouchbaseOrm::NestedDocument
+class HotelGeoCoordinates < CouchbaseOrm::NestedDocument
   attribute :lat, :float
   attribute :lon, :float
   attribute :accuracy, :string
@@ -76,7 +76,7 @@ class Hotel < CouchbaseOrm::Base
   attribute :checkin, :string
   attribute :checkout, :string
   attribute :price, :string
-  attribute :geo, :nested, type: GeoCoordinates
+  attribute :geo, :nested, type: HotelGeoCoordinates
   attribute :type, :string
   attribute :country, :string
   attribute :city, :string
