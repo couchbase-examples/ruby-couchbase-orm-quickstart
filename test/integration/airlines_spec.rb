@@ -155,27 +155,25 @@ RSpec.describe 'Airlines API', type: :request do
   end
 
   describe 'GET /api/v1/airlines/list' do
-    let(:country) { 'United States' }
+    let(:country) { 'France' }
     let(:limit) { '10' }
     let(:offset) { '0' }
+
     let(:expected_airlines) do
       [
-        { 'name' => '40-Mile Air', 'iata' => 'Q5', 'icao' => 'MLA', 'callsign' => 'MILE-AIR',
-          'country' => 'United States' },
-        { 'name' => 'Texas Wings', 'iata' => 'TQ', 'icao' => 'TXW', 'callsign' => 'TXW', 'country' => 'United States' },
-        { 'name' => 'Atifly', 'iata' => 'A1', 'icao' => 'A1F', 'callsign' => 'atifly', 'country' => 'United States' },
-        { 'name' => 'Locair', 'iata' => 'ZQ', 'icao' => 'LOC', 'callsign' => 'LOCAIR', 'country' => 'United States' },
-        { 'name' => 'SeaPort Airlines', 'iata' => 'K5', 'icao' => 'SQH', 'callsign' => 'SASQUATCH',
-          'country' => 'United States' },
-        { 'name' => 'Alaska Central Express', 'iata' => 'KO', 'icao' => 'AER', 'callsign' => 'ACE AIR',
-          'country' => 'United States' },
-        { 'name' => 'AirTran Airways', 'iata' => 'FL', 'icao' => 'TRS', 'callsign' => 'CITRUS',
-          'country' => 'United States' },
-        { 'name' => 'U.S. Air', 'iata' => '-+', 'icao' => '--+', 'callsign' => nil, 'country' => 'United States' },
-        { 'name' => 'PanAm World Airways', 'iata' => 'WQ', 'icao' => 'PQW', 'callsign' => nil,
-          'country' => 'United States' },
-        { 'name' => 'Bemidji Airlines', 'iata' => 'CH', 'icao' => 'BMJ', 'callsign' => 'BEMIDJI',
-          'country' => 'United States' }
+        { 'callsign' => 'REUNION', 'country' => 'France', 'iata' => 'UU', 'icao' => 'REU', 'name' => 'Air Austral' },
+        { 'callsign' => 'AIRLINAIR', 'country' => 'France', 'iata' => 'A5', 'icao' => 'RLA', 'name' => 'Airlinair' },
+        { 'callsign' => 'AIRFRANS', 'country' => 'France', 'iata' => 'AF', 'icao' => 'AFR', 'name' => 'Air France' },
+        { 'callsign' => 'AIRCALIN', 'country' => 'France', 'iata' => 'SB', 'icao' => 'ACI',
+          'name' => 'Air Caledonie International' },
+        { 'callsign' => 'T&', 'country' => 'France', 'iata' => '&T', 'icao' => 'T&O',
+          'name' => "Tom's & co airliners" },
+        { 'callsign' => 'BRITAIR', 'country' => 'France', 'iata' => 'DB', 'icao' => 'BZH', 'name' => 'Brit Air' },
+        { 'callsign' => 'Vickjet', 'country' => 'France', 'iata' => 'KT', 'icao' => 'VKJ', 'name' => 'VickJet' },
+        { 'callsign' => 'CORSAIR', 'country' => 'France', 'iata' => 'SS', 'icao' => 'CRL', 'name' => 'Corsairfly' },
+        { 'callsign' => 'CORSICA', 'country' => 'France', 'iata' => 'XK', 'icao' => 'CCM',
+          'name' => 'Corse-Mediterranee' },
+        { 'callsign' => 'AIGLE AZUR', 'country' => 'France', 'iata' => 'ZI', 'icao' => 'AAF', 'name' => 'Aigle Azur' }
       ]
     end
 

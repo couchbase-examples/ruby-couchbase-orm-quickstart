@@ -192,10 +192,10 @@ RSpec.describe 'Airports API', type: :request do
   end
 
   describe 'GET /api/v1/airports/direct-connections' do
-    let(:destination_airport_code) { 'JFK' }
+    let(:destination_airport_code) { 'LAX' }
     let(:limit) { 10 }
     let(:offset) { 0 }
-    let(:expected_connections) { %w[DEL LHR EZE ATL CUN MEX LAX SAN SEA SFO] }
+    let(:expected_connections) { %w[NRT CUN GDL HMO MEX MZT PVR SJD ZIH ZLO] }
 
     context 'when the destination airport code is provided' do
       it 'returns the direct connections' do
@@ -213,7 +213,8 @@ RSpec.describe 'Airports API', type: :request do
         get '/api/v1/airports/direct-connections'
 
         expect(response).to have_http_status(:bad_request)
-        expect(JSON.parse(response.body)).to eq({ 'message' => 'Destination airport code is required' })
+        expect(JSON.parse(response.body)).to eq({ 'error' => 'Invalid request',
+                                                  'message' => 'Destination airport is missing' })
       end
     end
   end
