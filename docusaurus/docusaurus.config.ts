@@ -39,12 +39,6 @@ const config: Config = {
           // Remove this to remove the "edit this page" links.
           editUrl: `https://github.com/couchbase-examples/ruby-couchbase-orm-quickstart/tree/docs/docusaurus/docusaurus/docs`,
         },
-        blog: {
-          showReadingTime: true,
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl: `https://github.com/couchbase-examples/ruby-couchbase-orm-quickstart/tree/docs/docusaurus/docusaurus/blog`,
-        },
         theme: {
           customCss: './src/css/custom.css',
         },
@@ -56,9 +50,9 @@ const config: Config = {
     // Replace with your project's social card
     image: 'img/docusaurus-social-card.jpg',
     navbar: {
-      title: 'My Site',
+      title: 'Ruby Couchbase ORM',
       logo: {
-        alt: 'My Site Logo',
+        alt: 'Ruby Couchbase ORM Tutorial Logo',
         src: 'img/logo.svg',
       },
       items: [
@@ -68,7 +62,6 @@ const config: Config = {
           position: 'left',
           label: 'Tutorial',
         },
-        { to: '/blog', label: 'Blog', position: 'left' },
         {
           href: 'https://github.com/facebook/docusaurus',
           label: 'GitHub',
@@ -108,10 +101,7 @@ const config: Config = {
         {
           title: 'More',
           items: [
-            {
-              label: 'Blog',
-              to: '/blog',
-            },
+            
             {
               label: 'GitHub',
               href: 'https://github.com/facebook/docusaurus',
