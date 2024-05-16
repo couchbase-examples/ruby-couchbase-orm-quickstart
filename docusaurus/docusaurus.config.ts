@@ -5,7 +5,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 const config: Config = {
   title: 'Ruby Couchbase ORM',
   tagline: 'Quickstart guide for Ruby Couchbase ORM',
-  favicon: 'img/favicon.ico',
+  favicon: 'img/logo.svg',
 
   // Set the production url of your site here
   url: 'https://couchbase-examples.github.io/',
