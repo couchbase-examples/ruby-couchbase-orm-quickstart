@@ -107,12 +107,15 @@ class Hotel < CouchbaseOrm::Base
 
   validate :custom_validation
 
-  n1ql :find_by_name_n1ql, 'SELECT * FROM hotels WHERE name = $1'
+  # n1ql :find_by_name_n1ql, 'SELECT * FROM hotels WHERE name = $1'
+  n1ql :find_by_name_n1ql, query_fn: proc { |bucket, values, options|
+                                       cluster.query('SELECT * FROM hotels WHERE name = $1', values:, options:)
+                                     }
 
   def custom_validation
-    if title.include?('funny')
-      errors.add(:title, 'cannot be funny')
-    end
+    return unless title.include?('funny')
+
+    errors.add(:title, 'cannot be funny')
   end
 
   def set_timestamps
@@ -122,14 +125,13 @@ class Hotel < CouchbaseOrm::Base
   end
 
   def encrypt_address
-    self.address = encrypt(self.address) if address_changed?
+    self.address = encrypt(address) if address_changed?
   end
 
   def encrypt(data)
     # Implement your encryption logic here
     # For example, using a simple XOR encryption
-    key = "secret_key"
-    encrypted_data = data.chars.map { |c| (c.ord ^ key.ord).chr }.join
-    encrypted_data
+    key = 'secret_key'
+    data.chars.map { |c| (c.ord ^ key.ord).chr }.join
   end
 end
