@@ -4,6 +4,38 @@ Rails.application.routes.draw do
 
   namespace :api do
     namespace :v1 do
+      # Users resource routes
+      get 'users/list', to: 'users#index'
+      get 'users/:id', to: 'users#show'
+      post 'users/:id', to: 'users#create'
+      put 'users/:id', to: 'users#update'
+      delete 'users/:id', to: 'users#destroy'
+
+      # Posts resource routes
+      get 'posts/list', to: 'posts#index'
+      get 'posts/:id', to: 'posts#show'
+      post 'posts/:id', to: 'posts#create'
+      put 'posts/:id', to: 'posts#update'
+      delete 'posts/:id', to: 'posts#destroy'
+
+      # Documents resource routes
+      get 'documents/list', to: 'documents#index'
+      get 'documents/:id', to: 'documents#show'
+      post 'documents/:id', to: 'documents#create'
+      put 'documents/:id', to: 'documents#update'
+      delete 'documents/:id', to: 'documents#destroy'
+
+      # Users resource routes for atomic operations
+      post 'users/:id/increment_points', to: 'users#increment_points'
+      post 'users/:id/decrement_points', to: 'users#decrement_points'
+
+      # Posts resource routes for atomic operations
+      post 'posts/:id/append_content', to: 'posts#append_content'
+      post 'posts/:id/prepend_content', to: 'posts#prepend_content'
+
+      # Documents resource routes for atomic operations
+      post 'documents/:id/touch_document', to: 'documents#touch_document'
+
       # Airlines resource routes
       get 'airlines/list', to: 'airlines#index'
       get 'airlines/to-airport', to: 'airlines#to_airport'
