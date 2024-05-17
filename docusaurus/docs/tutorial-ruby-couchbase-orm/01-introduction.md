@@ -4,7 +4,7 @@ sidebar_position: 01
 
 # Introduction
 
-Welcome to the documentation for Couchbase ORM, a powerful Object-Relational Mapping (ORM) library for Ruby that simplifies interactions with Couchbase Server. This guide will walk you through the features and usage of Couchbase ORM, helping you build efficient and scalable Ruby applications with Couchbase.
+Welcome to the documentation for Couchbase ORM, a Object-Relational Mapping (ORM) library for Ruby that simplifies interactions with Couchbase Server. This guide will walk you through the features and usage of Couchbase ORM, helping you build efficient and scalable Ruby applications with Couchbase.
 
 ## 1.1. What is Couchbase ORM?
 

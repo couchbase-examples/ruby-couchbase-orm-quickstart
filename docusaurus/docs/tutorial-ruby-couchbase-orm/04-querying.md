@@ -55,24 +55,7 @@ users = User.order(age: :desc)
 
 You can also chain multiple `order` clauses to sort by multiple attributes.
 
-## 4.4. Limit and Offset
-
-<!-- TODO: Have to implement this -->
-
-To limit the number of records returned or to skip a certain number of records, you can use the `limit` and `offset` methods.
-
-```ruby
-# Find the first 10 users
-users = User.limit(10)
-
-# Find users starting from the 11th record
-users = User.offset(10)
-
-# Find users starting from the 11th record and limit to 10 records
-users = User.offset(10).limit(10)
-```
-
-## 4.5. Scopes
+## 4.4. Scopes
 
 Scopes allow you to define reusable query snippets that can be chained with other query methods. Scopes are defined as class methods within your model.
 
@@ -88,7 +71,7 @@ users = User.active.adults
 
 Scopes provide a clean and DRY way to encapsulate commonly used query conditions.
 
-## 4.6. Pluck
+## 4.5. Pluck
 
 The `pluck` method allows you to retrieve specific attributes from the matched records instead of loading the entire objects. It returns an array of values for the specified attributes.
 
@@ -100,7 +83,7 @@ names = User.pluck(:name)
 name_emails = User.active.pluck(:name, :email)
 ```
 
-## 4.7. Destroy All
+## 4.6. Destroy All
 
 To delete multiple records that match specific conditions, you can use the `destroy_all` method.
 
