@@ -96,7 +96,8 @@ class Hotel < CouchbaseOrm::Base
   # Validations
   validates :title, :name, :address, :phone, :email, :fax, :url, presence: true
   validates :email, format: { with: URI::MailTo::EMAIL_REGEXP, message: 'must be a valid email address' }
-  validates :phone, format: { with: /\A\d{10}\z/, message: 'must be a valid 10-digit phone number' }
+  # validates :phone, format: { with: /\A\d{10}\z/, message: 'must be a valid 10-digit phone number' }
+  validates :phone, format: { numericality: { only_integer: true }, length: { is: 10 }, message: 'must be a valid 10-digit phone number' }
   validates :fax, format: { with: /\A\d{10}\z/, message: 'must be a valid 10-digit fax number' }
   validates :url, format: { with: URI::DEFAULT_PARSER.make_regexp, message: 'must be a valid URL' }
   validates :title, :name, :address, :city, :state, :country, length: { maximum: 255 }
