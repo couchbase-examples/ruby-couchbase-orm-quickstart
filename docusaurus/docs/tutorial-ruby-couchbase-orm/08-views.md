@@ -40,7 +40,6 @@ When using a compound key, the usage is the same, you just give the full key :
    
    # gives all comments that have been seen more than 10 times but less than 20
 ```
-Check this couchbase help page to learn more on what's possible with compound keys : <https://developer.couchbase.com/documentation/server/3.x/admin/Views/views-translateSQL.html>
 
 Ex : Compound keys allows to decide the order of the results, and you can reverse it by passing `descending: true`
 
