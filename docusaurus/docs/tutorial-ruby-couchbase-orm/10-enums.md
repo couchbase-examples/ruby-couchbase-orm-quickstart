@@ -46,8 +46,8 @@ In this example, we create a new `User` instance and set the `status` to `:activ
 CouchbaseOrm allows you to query records based on their enum values.
 
 ```ruby
-active_users = User.where(status: :active)
-suspended_users = User.where(status: :suspended)
+active_users = User.where(status: 1)
+suspended_users = User.where(status: 3)
 ```
 
 These queries retrieve users with the `status` enum set to `:active` and `:suspended`, respectively.

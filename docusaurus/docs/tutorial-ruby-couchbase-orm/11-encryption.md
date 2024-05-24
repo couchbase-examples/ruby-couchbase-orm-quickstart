@@ -2,87 +2,148 @@
 
 CouchbaseOrm provides built-in support for encrypting sensitive data stored in your Couchbase documents. Encryption allows you to protect confidential information, such as personal data or financial details, by encrypting the values before storing them in the database and decrypting them when retrieving the data.
 
-## 11.1. Configuring Encryption
-
-To enable encryption in CouchbaseOrm, you need to configure the encryption settings in your application. CouchbaseOrm uses the `ActiveSupport::MessageEncryptor` class from the Rails framework for encryption.
-
-First, generate a secret key that will be used for encryption and decryption. You can generate a random key using the following command:
-
-```bash
-ruby -e "require 'securerandom'; puts SecureRandom.hex(64)"
-```
-
-This command generates a 128-character hexadecimal string that you can use as the encryption key.
-
-Next, configure the encryption settings in your application's initialization file or environment-specific configuration file.
-
-```ruby
-CouchbaseOrm.configure do |config|
-  config.encryption_key = 'your_generated_encryption_key'
-end
-```
-
-Replace `'your_generated_encryption_key'` with the actual encryption key you generated.
-
-## 11.2. Encrypted Attributes
+## 11.1. Encrypted Attributes
 
 To mark an attribute as encrypted, you can use the `:encrypted` type when defining the attribute in your model.
 
 ```ruby
-class User < CouchbaseOrm::Base
+# Define the Bank model with an encrypted attribute
+class Bank < CouchbaseOrm::Base
   attribute :name, :string
-  attribute :email, :string
-  attribute :ssn, :encrypted
+  attribute :account_number, :encrypted
+  attribute :routing_number, :encrypted, alg: "3DES"
 end
 ```
 
-In this example, the `ssn` attribute is marked as encrypted. CouchbaseOrm will automatically encrypt the value of `ssn` before storing it in the Couchbase document and decrypt it when retrieving the document.
+In this example, the `account_number` and `routing_number` attributes are marked as encrypted. By default, CouchbaseOrm uses the `CB_MOBILE_CUSTOM` encryption algorithm for encrypting the values. You can specify a different encryption algorithm by providing the `alg` option.
 
 You can assign values to encrypted attributes just like any other attribute.
 
 ```ruby
-user = User.new
-user.name = 'John Doe'
-user.email = 'john@example.com'
-user.ssn = '123-45-6789'
-user.save
+bank = Bank.new(name: 'My Bank', account_number: '123456789', routing_number: '987654321')
 ```
 
 When the document is saved, CouchbaseOrm encrypts the value of `ssn` using the configured encryption key.
 
-## 11.3. Querying Encrypted Attributes
-
-Querying encrypted attributes requires special handling because the encrypted values are stored in the database.
-
-CouchbaseOrm provides a `where_encrypted` method that allows you to query encrypted attributes.
+## 11.2. Encryption Process 
 
 ```ruby
-encrypted_users = User.where_encrypted(ssn: '123-45-6789')
-```
+require 'base64'
+require 'logger'
 
-The `where_encrypted` method encrypts the provided value and performs the query using the encrypted value. It returns the matching documents with the encrypted attributes decrypted.
+Bank.all.each(&:destroy)
 
-Note that querying encrypted attributes may have performance implications since the values need to be encrypted before querying and decrypted after retrieval.
-
-## 11.4. Encryption Algorithm
-
-By default, CouchbaseOrm uses the AES-256-GCM encryption algorithm provided by the `ActiveSupport::MessageEncryptor` class. This algorithm is secure and widely used for symmetric encryption.
-
-If you need to use a different encryption algorithm or customize the encryption settings, you can configure the `ActiveSupport::MessageEncryptor` instance used by CouchbaseOrm.
-
-```ruby
-CouchbaseOrm.configure do |config|
-  config.encryption_options = {
-    cipher: 'aes-256-cbc',
-    key: 'your_encryption_key',
-    iv: 'your_initialization_vector'
-  }
+# Method to print serialized attributes
+def expect_serialized_attributes(bank)
+  serialized_attrs = bank.send(:serialized_attributes)
+  puts "Serialized Attributes:"
+  serialized_attrs.each do |key, value|
+    puts "#{key}: #{value}"
+  end
+  json_attrs = JSON.parse(bank.to_json)
+  puts "\nAttributes from JSON:"
+  json_attrs.each do |key, value|
+    puts "#{key}: #{value}"
+  end
+  puts "\nAttributes from as_json:"
+  bank.as_json.each do |key, value|
+    puts "#{key}: #{value}"
+  end
 end
+
+# Create a new bank record with encrypted attributes
+bank = Bank.new(
+  name: "Test Bank",
+  account_number: Base64.strict_encode64("123456789"),
+  routing_number: Base64.strict_encode64("987654321")
+)
+
+# Print serialized attributes before saving
+puts "Before Save:"
+expect_serialized_attributes(bank)
+
+# Save the bank record to Couchbase
+bank.save!
+
+# Reload the bank record from Couchbase
+bank.reload
+
+# Print serialized attributes after reloading
+puts "\nAfter Reload:"
+expect_serialized_attributes(bank)
+
+# Find the bank record by ID
+found_bank = Bank.find(bank.id)
+
+# Print serialized attributes after finding
+puts "\nAfter Find:"
+expect_serialized_attributes(found_bank)
+
 ```
 
-In this example, we configure CouchbaseOrm to use the AES-256-CBC encryption algorithm with a custom encryption key and initialization vector.
+In this example, we create a new `Bank` instance with encrypted attributes for `account_number` and `routing_number`. We then save the bank record to Couchbase, reload it, and find it by ID. We print the serialized attributes before saving, after reloading, and after finding the record to demonstrate the encryption and decryption process.
 
-## 11.5. Encryption and Decryption Process
+Output:
+```
+Before Save:
+Serialized Attributes:
+id: 
+name: Test Bank
+encrypted$account_number: {:alg=>"CB_MOBILE_CUSTOM", :ciphertext=>"MTIzNDU2Nzg5"}
+encrypted$routing_number: {:alg=>"3DES", :ciphertext=>"OTg3NjU0MzIx"}
+
+Attributes from JSON:
+id: 
+name: Test Bank
+account_number: MTIzNDU2Nzg5
+routing_number: OTg3NjU0MzIx
+
+Attributes from as_json:
+id: 
+name: Test Bank
+account_number: MTIzNDU2Nzg5
+routing_number: OTg3NjU0MzIx
+
+After Reload:
+Serialized Attributes:
+id: bank-1-vpbKLPzAg
+name: Test Bank
+encrypted$account_number: {:alg=>"CB_MOBILE_CUSTOM", :ciphertext=>"MTIzNDU2Nzg5"}
+encrypted$routing_number: {:alg=>"3DES", :ciphertext=>"OTg3NjU0MzIx"}
+
+Attributes from JSON:
+id: bank-1-vpbKLPzAg
+name: Test Bank
+account_number: MTIzNDU2Nzg5
+routing_number: OTg3NjU0MzIx
+
+Attributes from as_json:
+id: bank-1-vpbKLPzAg
+name: Test Bank
+account_number: MTIzNDU2Nzg5
+routing_number: OTg3NjU0MzIx
+
+After Find:
+Serialized Attributes:
+id: bank-1-vpbKLPzAg
+name: Test Bank
+encrypted$account_number: {:alg=>"CB_MOBILE_CUSTOM", :ciphertext=>"MTIzNDU2Nzg5"}
+encrypted$routing_number: {:alg=>"3DES", :ciphertext=>"OTg3NjU0MzIx"}
+
+Attributes from JSON:
+id: bank-1-vpbKLPzAg
+name: Test Bank
+account_number: MTIzNDU2Nzg5
+routing_number: OTg3NjU0MzIx
+
+Attributes from as_json:
+id: bank-1-vpbKLPzAg
+name: Test Bank
+account_number: MTIzNDU2Nzg5
+routing_number: OTg3NjU0MzIx
+```
+
+## 11.3. Encryption and Decryption Process
 
 When an encrypted attribute is assigned a value, CouchbaseOrm encrypts the value using the configured encryption key and algorithm. The encrypted value is then stored in the Couchbase document.
 
@@ -90,7 +151,7 @@ When retrieving a document with encrypted attributes, CouchbaseOrm automatically
 
 It's important to keep the encryption key secure and protect it from unauthorized access. If the encryption key is compromised, the encrypted data can be decrypted by anyone who obtains the key.
 
-## 11.6. Considerations and Best Practices
+## 11.4. Considerations and Best Practices
 
 When using encryption in CouchbaseOrm, consider the following best practices:
 

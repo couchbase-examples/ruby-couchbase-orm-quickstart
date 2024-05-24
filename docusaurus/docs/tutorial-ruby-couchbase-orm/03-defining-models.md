@@ -1,7 +1,3 @@
----
-sidebar_position: 03
----
-
 # Defining Models
 
 In CouchbaseOrm, models are defined as Ruby classes that inherit from `CouchbaseOrm::Base`. Each model represents a document type in Couchbase Server and encapsulates the data and behavior of the objects in your application.
@@ -25,11 +21,21 @@ Here's an example of defining attributes in the `User` model:
 
 ```ruby
 class User < CouchbaseOrm::Base
-  attribute :name, :string
   attribute :email, :string
+  attribute :name, :string
   attribute :age, :integer
-  attribute :active, :boolean
+  attribute :height, :float
+  attribute :is_active, :boolean
+  attribute :birth_date, :date
   attribute :created_at, :datetime
+  attribute :updated_at, :datetime
+  attribute :appointment_time, :time
+  attribute :hobbies, :array, type: :string
+  attribute :metadata, type: Hash
+  attribute :avatar, :binary
+
+  attribute :created_at, :datetime
+  attribute :updated_at, :datetime
 end
 ```
 
@@ -43,8 +49,9 @@ In this example, we define several attributes for the `User` model, each with a 
 - `:datetime`: Represents a date and time value.
 - `:time`: Represents a time value.
 - `:array`: Represents an array of values.
-- `:hash`: Represents a hash (dictionary) of key-value pairs.
 - `:binary`: Represents a binary data value.
+
+- `Hash`: Represents a hash (dictionary) of key-value pairs.
 
 CouchbaseOrm automatically handles the serialization and deserialization of these attribute types when storing and retrieving documents from Couchbase Server.
 
@@ -53,24 +60,24 @@ CouchbaseOrm automatically handles the serialization and deserialization of thes
 In addition to specifying the attribute type, you can also provide additional options to customize the behavior of the attributes. Some commonly used options include:
 
 - `default`: Specifies a default value for the attribute if no value is provided.
-- `alias`: Defines an alternate name for the attribute in the document.
-- `readonly`: Marks the attribute as read-only, preventing it from being modified.
+
 
 Here's an example of using attribute options:
 
 ```ruby
 class User < CouchbaseOrm::Base
   attribute :name, :string, default: 'Unknown'
-  attribute :email, :string, alias: :contact_email
-  attribute :age, :integer, readonly: true
+  # attribute :email, :string, alias: :contact_email
+  # attribute :age, :integer, readonly: true
 end
 ```
 
-In this example, the `name` attribute has a default value of `'Unknown'`, the `email` attribute is aliased as `contact_email` in the document, and the `age` attribute is marked as read-only.
+In this example, the `name` attribute has a default value of `'Unknown'`.
+ <!-- the `email` attribute is aliased as `contact_email` in the document, and the `age` attribute is marked as read-only. -->
 
 ## 3.4. Timestamps
 
-CouchbaseOrm provides built-in support for timestamp attributes. By default, if you define attributes named `created_at` and `updated_at` with the `:datetime` type, CouchbaseOrm will automatically populate these attributes with the current date and time when a document is created or updated.
+CouchbaseOrm provides built-in support for timestamp attributes. By default, if you define attributes named `created_at` and `updated_at` with the `:datetime` type, CouchbaseOrm will automatically populate these attributes with the current date and time when a document is created or updated. To enable this feature, add the `created_at` and `updated_at` attributes to your model.The fields are automatically updated when the document is saved.`document.save`
 
 ```ruby
 class User < CouchbaseOrm::Base
@@ -99,16 +106,56 @@ Here are some commonly used callbacks:
 To define a callback, use the corresponding callback method and provide a block or method name to be executed. For example:
 
 ```ruby
-class User < CouchbaseOrm::Base
-  before_create :set_default_role
+class Document < CouchbaseOrm::Base
+  attribute :title, :string
+  attribute :content, :string
 
-  def set_default_role
-    self.role ||= 'user'
+  before_create :before_create_callback
+  after_create :after_create_callback
+  before_save :before_save_callback
+  after_save :after_save_callback
+  before_update :before_update_callback
+  after_update :after_update_callback
+  before_destroy :before_destroy_callback
+  after_destroy :after_destroy_callback
+
+  private
+
+  def before_create_callback
+    puts "Running before_create callback for #{title}"
+  end
+
+  def after_create_callback
+    puts "Running after_create callback for #{title}"
+  end
+
+  def before_save_callback
+    puts "Running before_save callback for #{title}"
+  end
+
+  def after_save_callback
+    puts "Running after_save callback for #{title}"
+  end
+
+  def before_update_callback
+    puts "Running before_update callback for #{title}"
+  end
+
+  def after_update_callback
+    puts "Running after_update callback for #{title}"
+  end
+
+  def before_destroy_callback
+    puts "Running before_destroy callback for #{title}"
+  end
+
+  def after_destroy_callback
+    puts "Running after_destroy callback for #{title}"
   end
 end
 ```
 
-In this example, the `set_default_role` method is defined as a `before_create` callback. It sets a default role for the user if no role is provided before creating a new document.
+In this example, the `Document` model defines several callbacks that are triggered at different points in the document's lifecycle. The callback methods are implemented as private instance methods within the model class.
 
 Callbacks allow you to encapsulate logic related to the document lifecycle and maintain a clean and organized codebase.
 
@@ -119,14 +166,27 @@ CouchbaseOrm includes built-in validation capabilities to ensure the integrity a
 To define validations, use the `validates` method followed by the attribute name and the desired validation rules. For example:
 
 ```ruby
-class User < CouchbaseOrm::Base
-  attribute :name, :string
+class Book < CouchbaseOrm::Base
+  attribute :title, :string
+  attribute :author, :string
+  attribute :pages, :integer
+  attribute :genre, :string
   attribute :email, :string
-  attribute :age, :integer
 
-  validates :name, presence: true
+  validates_presence_of :title
+  validates :author, presence: true
+  validates :pages, numericality: { greater_than: 0 }
+  validates :genre, inclusion: { in: %w[Fiction Non-Fiction] }
+  validates :author, format: { with: /\A[a-zA-Z]+\z/, message: 'only allows letters' }
+  validates :pages, length: { maximum: 500 }
+  validates :genre, exclusion: { in: %w[Science-Fiction] }
   validates :email, format: { with: /\A[\w+\-.]+@[a-z\d\-]+(\.[a-z\d\-]+)*\.[a-z]+\z/i }
-  validates :age, numericality: { greater_than_or_equal_to: 18 }
+
+  validate :custom_validation
+
+  private
+
+  ...
 end
 ```
 
@@ -139,22 +199,34 @@ In this example, we define several validations for the `User` model:
 CouchbaseOrm provides a wide range of built-in validation helpers, such as:
 
 - `presence`: Ensures that the attribute is not blank.
-- `uniqueness`: Ensures that the attribute value is unique among all documents.
+- `validates_presence_of`: An alias for `presence`.
+<!-- - `uniqueness`: Ensures that the attribute value is unique among all documents. -->
 - `format`: Validates the attribute value against a regular expression.
 - `length`: Validates the length of the attribute value.
 - `numericality`: Validates that the attribute value is a valid number.
 - `inclusion`: Ensures that the attribute value is included in a given set.
 - `exclusion`: Ensures that the attribute value is not included in a given set.
 
+
 You can also define custom validation methods by adding methods to your model class and using the `validate` method to trigger them. For example:
 
 ```ruby
-class User < CouchbaseOrm::Base
+class Book < CouchbaseOrm::Base
+  attribute :title, :string
+  ...
+
   validate :custom_validation
 
+  private
+
   def custom_validation
-    if some_condition
-      errors.add(:base, 'Custom validation failed')
+    puts 'Running custom validation...'
+    if title&.include?('Funny')
+      errors.add(:title, 'should not contain the word "Funny"')
+    else
+      # print the title
+      puts "Title: #{title}"
+      puts 'Custom validation passed'
     end
   end
 end

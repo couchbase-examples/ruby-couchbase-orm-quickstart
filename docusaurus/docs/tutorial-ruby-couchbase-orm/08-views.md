@@ -1,7 +1,3 @@
----
-sidebar_position: 08
----
-
 # Views
 
 CouchbaseOrm provides support for using views to query and index your data. Views are a powerful feature of Couchbase Server that allow you to define custom map-reduce functions to extract, filter, and aggregate your data.

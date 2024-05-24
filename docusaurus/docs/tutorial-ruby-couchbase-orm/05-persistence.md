@@ -1,7 +1,3 @@
----
-sidebar_position: 05
----
-
 # Persistence
 
 CouchbaseOrm provides a simple and intuitive way to persist data to Couchbase Server. With CouchbaseOrm, you can easily create, update, save, and destroy records using a set of built-in methods.
@@ -11,43 +7,65 @@ CouchbaseOrm provides a simple and intuitive way to persist data to Couchbase Se
 To create a new record, you can instantiate a new instance of your model class and then call the `save` method to persist it to the database.
 
 ```ruby
-user = User.new(name: 'John', email: 'john@example.com')
-user.save
+class Task < CouchbaseOrm::Base
+  attribute :title, :string
+  attribute :description, :string
+  attribute :completed, :boolean, default: false
+end
+
+task1 = Task.new(title: 'Task 1', description: 'Description of Task 1')
+task1.save
+puts "Task 1 created with id: #{task1.id}, #{task1.inspect}"
 ```
 
 Alternatively, you can use the `create` method to create a new record in a single step:
 
 ```ruby
-user = User.create(name: 'John', email: 'john@example.com')
+task1 = Task.create(title: 'Task 1', description: 'Description of Task 1')
+```
+Output of the above code:
+```
+Task 1 created with id: task-1-tLJM721QY, #<Task id: "task-1-tLJM721QY", title: "Task 1", description: "Description of Task 1", completed: false>
 ```
 
 The `create` method instantiates a new instance of the model, sets the attributes, and saves it to the database.
 
-## 5.2. Updating Records
-
-To update an existing record, you can modify its attributes and then call the `save` method to persist the changes.
-
-```ruby
-user = User.find('user_id_123')
-user.name = 'John Doe'
-user.save
-```
-
-CouchbaseOrm automatically tracks the changes made to the attributes and updates only the modified fields in the database.
-
-## 5.3. Saving Records
+## 5.2. Saving Records
 
 The `save` method is used to persist a record to the database, whether it's a new record or an existing one with modifications.
 
 ```ruby
-user = User.new(name: 'John')
-user.save # Creates a new record
+# Update an existing task
+task2 = Task.create(title: 'Task 2', description: 'Description of Task 2')
+task2.description = 'Updated description of Task 2'
+task2.save
+puts "Task 2 updated with id: #{task2.id}, #{task2.inspect}"
+```
 
-user.name = 'John Doe'
-user.save # Updates the existing record
+Output of the above code:
+```
+Task 2 updated with id: task-1-tLJM895Xq, #<Task id: "task-1-tLJM895Xq", title: "Task 2", description: "Updated description of Task 2", completed: false>
 ```
 
 If the record is new (i.e., it doesn't have an ID), `save` will create a new document in Couchbase Server. If the record already exists, `save` will update the existing document with the modified attributes.
+
+## 5.3. Updating Records
+
+To update an existing record, you can modify its attributes and then call the `save` method to persist the changes.
+
+```ruby
+# Update specific fields of a task
+task3 = Task.create(title: 'Task 3', description: 'Description of Task 3')
+task3.update(description: 'Updated description of Task 3', completed: true)
+puts "Task 3 updated with id: #{task3.id}, #{task3.inspect}"
+```
+
+Output of the above code:
+```
+Task 3 updated with id: task-1-tLJMA6cBp, #<Task id: "task-1-tLJMA6cBp", title: "Task 3", description: "Updated description of Task 3", completed: true>
+```
+
+CouchbaseOrm automatically tracks the changes made to the attributes and updates only the modified fields in the database.
 
 ## 5.4. Destroying Records
 
@@ -60,18 +78,8 @@ user.destroy
 
 The `destroy` method removes the corresponding document from Couchbase Server and freezes the model instance to prevent further modifications.
 
-## 5.5. Updating Specific Fields
 
-CouchbaseOrm provides a way to update specific fields of a record without retrieving the entire document from the database. This can be useful for performance optimization when you only need to update a subset of attributes.
-
-```ruby
-user = User.find('user_id_123')
-user.update(name: 'John Doe', age: 30)
-```
-
-The `update` method updates only the specified attributes of the record in the database.
-
-## 5.6. Callbacks
+## 5.5. Callbacks
 
 As mentioned in the previous section on defining models, CouchbaseOrm supports lifecycle callbacks that allow you to execute code at certain points in a record's persistence lifecycle.
 

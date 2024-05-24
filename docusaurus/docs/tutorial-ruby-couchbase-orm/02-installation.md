@@ -1,7 +1,3 @@
----
-sidebar_position: 02
----
-
 # Installation
 
 Installing Couchbase ORM is a straightforward process. In this section, we'll guide you through the prerequisites and the step-by-step installation procedure.
@@ -10,13 +6,13 @@ Installing Couchbase ORM is a straightforward process. In this section, we'll gu
 
 Before installing Couchbase ORM, ensure that you have the following prerequisites in place:
 
-1. **Ruby**: Couchbase ORM requires Ruby version 2.5 or higher. You can check your Ruby version by running the following command in your terminal:
+1. **Ruby**: Couchbase ORM requires Ruby version 2.7 or higher. You can check your Ruby version by running the following command in your terminal:
 
    ```
    ruby -v
    ```
 
-   If you don't have Ruby installed or your version is older than 2.5, you can install the latest version from the official Ruby website: [https://www.ruby-lang.org](https://www.ruby-lang.org)
+   If you don't have Ruby installed or your version is older than 2.7, you can install the latest version from the official Ruby website: [https://www.ruby-lang.org](https://www.ruby-lang.org)
 
 2. **Couchbase Server**: Couchbase ORM works with Couchbase Server, a NoSQL database. Make sure you have Couchbase Server installed and running on your system. You can download Couchbase Server from the official website: [https://www.couchbase.com/downloads](https://www.couchbase.com/downloads)
 
@@ -42,7 +38,7 @@ To install Couchbase ORM, you have a couple of options:
 
    Then, run the following command to install the gem:
 
-   ```
+   ```sh
    bundle install
    ```
 
@@ -50,7 +46,7 @@ To install Couchbase ORM, you have a couple of options:
 
 2. **Using RubyGems**: If you're not using Bundler, you can install Couchbase ORM directly using RubyGems. Run the following command in your terminal:
 
-   ```
+   ```sh
    gem install couchbase-orm
    ```
 
@@ -97,9 +93,9 @@ To use Couchbase ORM in your Ruby application, you need to configure the connect
    ```ruby
    Couchbase ORM.configure do |config|
      config.connection_string = 'couchbase://localhost'
-     config.bucket = 'my_app'
-     config.username = 'my_username'
-     config.password = 'my_password'
+     config.bucket = 'travel-sample'
+     config.username = 'Administrator'
+     config.password = 'password'
    end
    ```
 

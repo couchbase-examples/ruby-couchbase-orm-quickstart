@@ -1,7 +1,3 @@
----
-sidebar_position: 04
----
-
 # Querying
 
 CouchbaseOrm provides a powerful and expressive query interface for retrieving data from Couchbase Server. With CouchbaseOrm, you can easily construct queries using a fluent and intuitive API that resembles the querying capabilities of ActiveRecord.
@@ -17,27 +13,77 @@ CouchbaseOrm offers various methods to find records based on different criteria.
 Here are some examples of finding records:
 
 ```ruby
-# Find a user by ID
-user = User.find('user_id_123')
+# Define an Author model
+class Author < CouchbaseOrm::Base
+  attribute :name, :string
+  attribute :age, :integer
+  attribute :active, :boolean, default: true
 
-# Find the first user with a specific email
-user = User.find_by(email: 'user@example.com')
+  validates :name, presence: true
+  validates :age, numericality: { greater_than_or_equal_to: 18 }
 
-# Find all active users
-active_users = User.where(active: true)
+end
+
+# Create new authors
+author1 = Author.new(name: 'John Doe', age: 30, active: true)
+author2 = Author.new(name: 'Jane Smith', age: 25, active: false)
+author3 = Author.new(name: 'Alice Brown', age: 40, active: true)
+author4 = Author.new(name: 'Bob Johnson', age: 17, active: true)
+
+# Save authors
+author1.save
+author2.save
+author3.save
+author4.save
+
+# Find authors by ID
+puts "Find by ID:"
+puts Author.find(author1.id).inspect
+
+# Find the first author with a specific name
+puts "\nFind by name:"
+puts Author.find_by(name: 'John Doe').inspect
+
+# Where
+puts "\nWhere:"
+puts Author.where(active: true).to_a.inspect
 ```
+
+Output of the above code:
+```
+Find by ID:
+#<Author id: "author-1-tIqa9xA5k", name: "John Doe", age: 30, active: true>
+
+Find by name:
+#<Author id: "author-1-tIqa9xA5k", name: "John Doe", age: 30, active: true>
+
+Where:
+[#<Author id: "author-1-tIqa9xA5k", name: "John Doe", age: 30, active: true>, #<Author id: "author-1-tIqaAdJC-", name: "Alice Brown", age: 40, active: true>]
+```
+
 
 ## 4.2. Where Clauses
 
 The `where` method allows you to specify conditions to filter the records based on attribute values. You can chain multiple `where` clauses together to build more complex queries.
 
 ```ruby
-# Find users with a specific name and age greater than 25
-users = User.where(name: 'John').where('age > ?', 25)
+# Where
+puts "\nWhere chain:"
+puts Author.where(active: true).where('age >= 30').to_a.inspect
 
-# Find users with an email ending with a specific domain
-users = User.where('email LIKE ?', '%@example.com')
+puts "\nWhere with regex:"
+puts Author.where("name like '%John%'").to_a.inspect
 ```
+
+Output
+```
+Where chain:
+[#<Author id: "author-1-tJFHUZcxT", name: "John Doe", age: 30, active: true>, #<Author id: "author-1-tJFHWh88k", name: "Alice Brown", age: 40, active: true>]
+
+Where with regex:
+[#<Author id: "author-1-tJFHUZcxT", name: "John Doe", age: 30, active: true>]
+```
+
 
 CouchbaseOrm supports various comparison operators and placeholders in the `where` clauses, such as `=`, `>`, `<`, `>=`, `<=`, `LIKE`, and more.
 
@@ -46,54 +92,122 @@ CouchbaseOrm supports various comparison operators and placeholders in the `wher
 You can specify the order in which the retrieved records should be sorted using the `order` method. Pass the attribute name and the desired sort direction (`:asc` for ascending, `:desc` for descending).
 
 ```ruby
-# Find users ordered by name in ascending order
-users = User.order(:name)
+# Order authors by name
+puts "\nOrder by name:"
+puts Author.order(:name).to_a.inspect
 
-# Find users ordered by age in descending order
-users = User.order(age: :desc)
+# Order authors by age in descending order
+puts "\nOrder by age (descending):"
+puts Author.order(age: :desc).to_a.inspect
+```
+
+Output
+```
+Order by name:
+[#<Author id: "author-1-tJFHWh88k", name: "Alice Brown", age: 40, active: true>, #<Author id: "author-1-tJFHW6h7V", name: "Jane Smith", age: 25, active: false>, #<Author id: "author-1-tJFHUZcxT", name: "John Doe", age: 30, active: true>]
+
+Order by age (descending):
+[#<Author id: "author-1-tJFHWh88k", name: "Alice Brown", age: 40, active: true>, #<Author id: "author-1-tJFHUZcxT", name: "John Doe", age: 30, active: true>, #<Author id: "author-1-tJFHW6h7V", name: "Jane Smith", age: 25, active: false>]
 ```
 
 You can also chain multiple `order` clauses to sort by multiple attributes.
 
-## 4.4. Scopes
-
-Scopes allow you to define reusable query snippets that can be chained with other query methods. Scopes are defined as class methods within your model.
-
-```ruby
-class User < CouchbaseOrm::Base
-  scope :active, -> { where(active: true) }
-  scope :adults, -> { where('age >= ?', 18) }
-end
-
-# Find active adult users
-users = User.active.adults
-```
 
 Scopes provide a clean and DRY way to encapsulate commonly used query conditions.
 
-## 4.5. Pluck
+## 4.4. Pluck
 
 The `pluck` method allows you to retrieve specific attributes from the matched records instead of loading the entire objects. It returns an array of values for the specified attributes.
 
 ```ruby
-# Retrieve the names of all users
-names = User.pluck(:name)
-
-# Retrieve the names and emails of active users
-name_emails = User.active.pluck(:name, :email)
+# Pluck names of all authors
+puts "\nPluck names:"
+puts Author.order(:name).pluck(:name).inspect
 ```
 
-## 4.6. Destroy All
+Output
+```
+Pluck names:
+["Alice Brown", "Jane Smith", "John Doe"]
+```
 
-To delete multiple records that match specific conditions, you can use the `destroy_all` method.
+## 4.5. Destroying Records
+
+To delete multiple records that match specific conditions, you can use the `.each(&:destroy)` method. It deletes the records from the database and returns the number of records deleted.
 
 ```ruby
-# Delete all inactive users
-User.where(active: false).destroy_all
+# Destroy all inactive authors
+puts "\nDestroy all inactive authors:"
+authors = Author.where(active: false).to_a
+puts authors.inspect
+Author.where(active: false).each(&:destroy)
+
+# Check remaining authors
+puts "\nRemaining authors:"
+puts Author.all.to_a.inspect
 ```
 
-Be cautious when using `destroy_all` as it permanently deletes the matched records from the database.
+Output
+```
+Remaining authors:
+[#<Author id: "author-1-tK5S-hJY3", name: "Alice Brown", age: 40, active: true>, #<Author id: "author-1-tK5SzrgQL", name: "John Doe", age: 30, active: true>]
+```
+
+Be cautious when using `.each(&:destroy)` as it permanently deletes the matched records from the database.
 
 These are just a few examples of the querying capabilities provided by CouchbaseOrm. You can combine these methods in various ways to construct complex and specific queries based on your application's requirements.
 
 In the next section, we'll explore how to use CouchbaseOrm to create, update, and delete records in Couchbase Server.
+
+## 4.6. Scopes
+
+Scopes allow you to define reusable query snippets that can be chained with other query methods. Scopes are defined as class methods within your model.
+
+```ruby
+# Define a Comment model
+class Comment < CouchbaseOrm::Base
+  attribute :title, :string
+  attribute :author, :string
+  attribute :category, :string
+  attribute :ratings, :integer
+
+  def self.by_author(author)
+    where(author: author)
+  end
+
+  def self.highly_rated
+    where('ratings > 3')
+  end
+
+  def self.in_category(category)
+    where(category: category)
+  end
+end
+
+
+# Create some comments
+comment1 = Comment.new(title: 'First Comment', author: 'Anne McCaffrey', category: 'S-F', ratings: 5)
+comment2 = Comment.new(title: 'Second Comment', author: 'Anne McCaffrey', category: 'S-F', ratings: 4)
+comment3 = Comment.new(title: 'Third Comment', author: 'Anne McCaffrey', category: 'S-F', ratings: 3)
+comment4 = Comment.new(title: 'Fourth Comment', author: 'Anne McCaffrey', category: 'S-F', ratings: 2)
+
+# Save the comments
+comment1.save
+comment2.save
+comment3.save
+comment4.save
+
+# Example usage of scopes
+comments = Comment.by_author("Anne McCaffrey").in_category('S-F').highly_rated.order(:title).limit(10)
+
+# Iterate over the comments
+comments.each do |comment|
+  puts "Title: #{comment.title}, Author: #{comment.author}, Category: #{comment.category}, Ratings: #{comment.ratings}"
+end
+```
+
+Output
+```
+Title: First Comment, Author: Anne McCaffrey, Category: S-F, Ratings: 5
+Title: Second Comment, Author: Anne McCaffrey, Category: S-F, Ratings: 4
+```
