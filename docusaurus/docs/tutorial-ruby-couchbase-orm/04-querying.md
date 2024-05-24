@@ -37,30 +37,14 @@ author3.save
 author4.save
 
 # Find authors by ID
-puts "Find by ID:"
 puts Author.find(author1.id).inspect
 
 # Find the first author with a specific name
-puts "\nFind by name:"
 puts Author.find_by(name: 'John Doe').inspect
 
 # Where
-puts "\nWhere:"
 puts Author.where(active: true).to_a.inspect
 ```
-
-Output of the above code:
-```
-Find by ID:
-#<Author id: "author-1-tIqa9xA5k", name: "John Doe", age: 30, active: true>
-
-Find by name:
-#<Author id: "author-1-tIqa9xA5k", name: "John Doe", age: 30, active: true>
-
-Where:
-[#<Author id: "author-1-tIqa9xA5k", name: "John Doe", age: 30, active: true>, #<Author id: "author-1-tIqaAdJC-", name: "Alice Brown", age: 40, active: true>]
-```
-
 
 ## 4.2. Where Clauses
 
@@ -68,22 +52,10 @@ The `where` method allows you to specify conditions to filter the records based 
 
 ```ruby
 # Where
-puts "\nWhere chain:"
 puts Author.where(active: true).where('age >= 30').to_a.inspect
 
-puts "\nWhere with regex:"
 puts Author.where("name like '%John%'").to_a.inspect
 ```
-
-Output
-```
-Where chain:
-[#<Author id: "author-1-tJFHUZcxT", name: "John Doe", age: 30, active: true>, #<Author id: "author-1-tJFHWh88k", name: "Alice Brown", age: 40, active: true>]
-
-Where with regex:
-[#<Author id: "author-1-tJFHUZcxT", name: "John Doe", age: 30, active: true>]
-```
-
 
 CouchbaseOrm supports various comparison operators and placeholders in the `where` clauses, such as `=`, `>`, `<`, `>=`, `<=`, `LIKE`, and more.
 
@@ -93,21 +65,10 @@ You can specify the order in which the retrieved records should be sorted using 
 
 ```ruby
 # Order authors by name
-puts "\nOrder by name:"
 puts Author.order(:name).to_a.inspect
 
 # Order authors by age in descending order
-puts "\nOrder by age (descending):"
 puts Author.order(age: :desc).to_a.inspect
-```
-
-Output
-```
-Order by name:
-[#<Author id: "author-1-tJFHWh88k", name: "Alice Brown", age: 40, active: true>, #<Author id: "author-1-tJFHW6h7V", name: "Jane Smith", age: 25, active: false>, #<Author id: "author-1-tJFHUZcxT", name: "John Doe", age: 30, active: true>]
-
-Order by age (descending):
-[#<Author id: "author-1-tJFHWh88k", name: "Alice Brown", age: 40, active: true>, #<Author id: "author-1-tJFHUZcxT", name: "John Doe", age: 30, active: true>, #<Author id: "author-1-tJFHW6h7V", name: "Jane Smith", age: 25, active: false>]
 ```
 
 You can also chain multiple `order` clauses to sort by multiple attributes.
@@ -121,39 +82,25 @@ The `pluck` method allows you to retrieve specific attributes from the matched r
 
 ```ruby
 # Pluck names of all authors
-puts "\nPluck names:"
 puts Author.order(:name).pluck(:name).inspect
-```
-
-Output
-```
-Pluck names:
-["Alice Brown", "Jane Smith", "John Doe"]
 ```
 
 ## 4.5. Destroying Records
 
 To delete multiple records that match specific conditions, you can use the `.each(&:destroy)` method. It deletes the records from the database and returns the number of records deleted.
 
+- `:destroy`: Deletes a single record.
+- `delete_all`: Deletes all records that match the specified conditions.
+
 ```ruby
 # Destroy all inactive authors
-puts "\nDestroy all inactive authors:"
-authors = Author.where(active: false).to_a
-puts authors.inspect
 Author.where(active: false).each(&:destroy)
 
-# Check remaining authors
-puts "\nRemaining authors:"
-puts Author.all.to_a.inspect
+# Destroy all authors who are inactive
+Author.where(active: false).delete_all
+
 ```
 
-Output
-```
-Remaining authors:
-[#<Author id: "author-1-tK5S-hJY3", name: "Alice Brown", age: 40, active: true>, #<Author id: "author-1-tK5SzrgQL", name: "John Doe", age: 30, active: true>]
-```
-
-Be cautious when using `.each(&:destroy)` as it permanently deletes the matched records from the database.
 
 These are just a few examples of the querying capabilities provided by CouchbaseOrm. You can combine these methods in various ways to construct complex and specific queries based on your application's requirements.
 
@@ -204,10 +151,4 @@ comments = Comment.by_author("Anne McCaffrey").in_category('S-F').highly_rated.o
 comments.each do |comment|
   puts "Title: #{comment.title}, Author: #{comment.author}, Category: #{comment.category}, Ratings: #{comment.ratings}"
 end
-```
-
-Output
-```
-Title: First Comment, Author: Anne McCaffrey, Category: S-F, Ratings: 5
-Title: Second Comment, Author: Anne McCaffrey, Category: S-F, Ratings: 4
 ```

@@ -61,64 +61,29 @@ end
 
 In this example, a `Teacher` has many `Student`s, and a `Student` belongs to a `Teacher`. CouchbaseOrm assumes that the `students` documents contain a `teacher_id` field that references the associated teacher document.
 
-You can customize the foreign key and class name if needed:
-
-```ruby
-class Teacher < CouchbaseOrm::Base
-  has_many :pupils, class_name: 'Student', foreign_key: 'teacher_id'
-end
-```
+The class name and foreign key are optional and will be inferred from the association name if not provided.
 
 In the following example, we demonstrate how to work with associations in CouchbaseOrm:
 
 ```ruby
 # Creating a new teacher
-puts "\nCreating a new teacher..."
 teacher1 = Teacher.create(name: 'Mr. Smith', subject: 'Mathematics')
-puts teacher1.inspect
 
 # Creating new students
-puts "\nCreating new students..."
 student1 = Student.create(name: 'John Doe', grade: 9, teacher_id: teacher1.id)
 student2 = Student.create(name: 'Jane Roe', grade: 10, teacher_id: teacher1.id)
-puts student1.inspect
-puts student2.inspect
 
 # Associating students with teacher
-puts "\nAssociating students with teacher..."
 puts "Teacher's students: #{teacher1.students.inspect}"
 
 # Find a teacher by a student's teacher_id
-puts "\nFinding a teacher by a student's teacher_id..."
 found_teacher = Teacher.find(student1.teacher_id)
 puts found_teacher.inspect
 
 # List students of a teacher
-puts "\nListing students of a teacher..."
 teacher1.reload
 teacher_students = teacher1.students
 teacher_students.each { |student| puts student.inspect }
-```
-
-Output:
-
-```plaintext
-Creating a new teacher...
-#<Teacher id: "teacher-1-tMsE-O9pZ", name: "Mr. Smith", subject: "Mathematics">
-
-Creating new students...
-#<Student id: "student-1-tMsE_0KJ~", teacher_id: "teacher-1-tMsE-O9pZ", name: "John Doe", grade: 9>
-#<Student id: "student-1-tMsE_Pski", teacher_id: "teacher-1-tMsE-O9pZ", name: "Jane Roe", grade: 10>
-
-Associating students with teacher...
-Teacher's students: #<CouchbaseOrm::ResultsProxy:0x00007478a5145b08 @proxyfied=[#<Student id: "student-1-tMsE_0KJ~", teacher_id: "teacher-1-tMsE-O9pZ", name: "John Doe", grade: 9>, #<Student id: "student-1-tMsE_Pski", teacher_id: "teacher-1-tMsE-O9pZ", name: "Jane Roe", grade: 10>]>
-
-Finding a teacher by a student's teacher_id...
-#<Teacher id: "teacher-1-tMsE-O9pZ", name: "Mr. Smith", subject: "Mathematics">
-
-Listing students of a teacher...
-#<Student id: "student-1-tMsE_0KJ~", teacher_id: "teacher-1-tMsE-O9pZ", name: "John Doe", grade: 9>
-#<Student id: "student-1-tMsE_Pski", teacher_id: "teacher-1-tMsE-O9pZ", name: "Jane Roe", grade: 10>
 ```
 
 ## 6.3. Has And Belongs To Many
@@ -165,27 +130,32 @@ end
 In the following example, we demonstrate how to work with many-to-many associations in CouchbaseOrm:
 
 ```ruby
-# Create publishers
-publisher1 = Publisher.create(name: 'Penguin Random House')
-publisher2 = Publisher.create(name: 'Hearst Communications')
-
 # Create magazines
 magazine1 = Magazine.create(title: 'Vogue', genre: 'Fashion')
 magazine2 = Magazine.create(title: 'National Geographic', genre: 'Science')
 
+# Create publishers
+publisher1 = Publisher.create(name: 'Penguin Random House')
+publisher2 = Publisher.create(name: 'Hearst Communications')
+
 # Associate publishers with magazines
-publisher1.magazines << magazine1
-publisher2.magazines << magazine2
+publisher1.magazines = [magazine1, magazine2]
+publisher2.magazines = [magazine1]
+publisher1.save
+publisher2.save
+
+magazine1.publishers = [publisher1, publisher2]
+magazine2.publishers = [publisher1]
+magazine1.save
+magazine2.save
 
 # Print publishers and their magazines
-puts "Publishers:"
 puts Publisher.all.map { |publisher| "#{publisher.name} (ID: #{publisher.id})" }
 
-puts "\nMagazines:"
+# Print magazines and their publishers 
 puts Magazine.all.map { |magazine| "#{magazine.title} (Genre: #{magazine.genre}) by #{magazine.publishers.map(&:name).join(', ')} (ID: #{magazine.id})" }
 
 # print magazine and tojson
-puts "\nMagazines:"
 puts Magazine.all.map { |magazine| "#{magazine.to_json}" }
 ```
 
@@ -252,41 +222,6 @@ recent_posts = user.posts.where('created_at >= ?', 1.week.ago).order(created_at:
 
 This query retrieves the associated `Post`s for the user that were created within the last week, ordered by the most recent first.
 
-
-## 6.8. Validations on Associations
-
-CouchbaseOrm allows you to validate associated records when saving the parent record. This ensures that the associated records are valid before persisting them to the database.
-
-You can use the `validates_associated` method to validate associated records:
-
-```ruby
-class User < CouchbaseOrm::Base
-  has_many :posts
-  validates_associated :posts
-end
-
-class Post < CouchbaseOrm::Base
-  belongs_to :user
-  validates :title, presence: true
-end
-```
-
-In this example, when saving a `User`, CouchbaseOrm will also validate the associated `Post`s. If any of the associated `Post`s fail validation, the parent `User` will not be saved, and validation errors will be added to the parent record.
-
-You can also specify the validation context for associated records:
-
-```ruby
-class User < CouchbaseOrm::Base
-  has_many :posts
-  validates_associated :posts, on: :create
-end
-```
-
-In this case, the associated `Post`s will only be validated when creating a new `User`, not when updating an existing one.
-
-By using `validates_associated`, you can ensure that the entire object graph is valid before saving the parent record, maintaining data integrity and consistency.
-
-N1QL queries in CouchbaseOrm provide a powerful and flexible way to retrieve data from Couchbase Server. By leveraging the expressive power of N1QL, you can perform complex queries, aggregations, and data manipulations directly from your Ruby code.
 
 <!-- ## 6.9. Strict Loading
 

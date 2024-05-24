@@ -54,7 +54,6 @@ To access an nested document, you can simply call the corresponding attribute on
 
 ```ruby
 toyota_cars = Car.where(make: 'Toyota')
-puts "Toyota Cars: #{toyota_cars.map(&:model)}"  # Output: "Toyota Cars: ['Corolla']"
 ```
 
 CouchbaseOrm automatically deserializes the nested document and returns an instance of the nested document class.
@@ -67,7 +66,6 @@ To update an nested document, you can modify the attributes of the nested docume
 engine_part = car.parts.find { |part| part.name == 'Engine' }
 engine_part.manufacturer = 'Toyota Industries'
 car.save
-puts "Updated Engine Part Manufacturer: #{engine_part.manufacturer}"  # Output: "Updated Engine Part Manufacturer: Toyota Industries"
 ```
 
 CouchbaseOrm will serialize the updated nested document and save it along with the parent document.
@@ -97,7 +95,6 @@ CouchbaseOrm allows you to query nested documents using dot notation and attribu
 
 ```ruby
 cars_by_part_manufacturer = Car.where("ANY part IN parts SATISFIES part.manufacturer = 'Toyota Industries' END")
-puts "Cars with Toyota Industries parts: #{cars_by_part_manufacturer.map(&:model)}"  # Output: "Cars with Toyota Industries parts: ['Corolla']"
 ```
 
 This query retrieves all the `Car` documents where at least one `Part` document has a `manufacturer` attribute equal to `'Toyota Industries'`. You can use dot notation to access nested document attributes within the query condition.

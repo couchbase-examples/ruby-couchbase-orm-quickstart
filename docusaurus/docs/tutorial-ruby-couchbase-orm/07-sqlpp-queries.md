@@ -117,11 +117,9 @@ In the above example, the `by_custom_rating` and `by_custom_rating_values` queri
 ```ruby
 # Query by custom rating
 docs = N1QLTest.by_custom_rating.collect { |ob| ob.name }
-puts "By custom rating #{docs}"
 
 # Query by custom rating values
 docs = N1QLTest.by_custom_rating_values(key: [[1, 2]]).collect { |ob| ob.name }
-puts "By custom rating values #{docs}"
 ```
 
 In the above examples, the `collect` method is used to extract the `name` attribute from each document in the result set.
@@ -133,11 +131,9 @@ To optimize the performance of SQL++ queries, it's important to create appropria
 ```ruby
 # Query using index_n1ql
 docs = N1QLTest.find_by_rating(2).collect { |ob| ob.name }
-puts "By index_n1ql #{docs}"
 
 # Query using index_n1ql
 docs = N1QLTest.by_rating.to_a.collect { |ob| ob.name }
-puts "By index_n1ql #{docs}"
 ```
 
 In this example, indexes are defined on the `rating` attribute using the `index_n1ql` macro.

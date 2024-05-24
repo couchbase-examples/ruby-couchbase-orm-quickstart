@@ -15,7 +15,24 @@ class Bank < CouchbaseOrm::Base
 end
 ```
 
-In this example, the `account_number` and `routing_number` attributes are marked as encrypted. By default, CouchbaseOrm uses the `CB_MOBILE_CUSTOM` encryption algorithm for encrypting the values. You can specify a different encryption algorithm by providing the `alg` option.
+In this example, the `account_number` and `routing_number` attributes are marked as encrypted. By default, CouchbaseOrm uses the default `CB_MOBILE_CUSTOM` encryption algorithm for encrypting the values. You can specify a different encryption algorithm by providing the `alg` option.
+
+```plaintext
+{
+  "name": "Test Bank",
+  "encrypted$account_number": {
+    "alg": "CB_MOBILE_CUSTOM",
+    "ciphertext": "MTIzNDU2Nzg5"
+  },
+  "encrypted$routing_number": {
+    "alg": "3DES",
+    "ciphertext": "OTg3NjU0MzIx"
+  },
+  "type": "bank"
+}
+```
+
+When a document is saved, CouchbaseOrm stores the encrypted values in the document with a prefix of `encrypted$`. The encrypted values are stored as JSON objects containing the encryption algorithm (`alg`) and the ciphertext (`ciphertext`) of the encrypted value.
 
 You can assign values to encrypted attributes just like any other attribute.
 
@@ -36,16 +53,13 @@ Bank.all.each(&:destroy)
 # Method to print serialized attributes
 def expect_serialized_attributes(bank)
   serialized_attrs = bank.send(:serialized_attributes)
-  puts "Serialized Attributes:"
   serialized_attrs.each do |key, value|
     puts "#{key}: #{value}"
   end
   json_attrs = JSON.parse(bank.to_json)
-  puts "\nAttributes from JSON:"
   json_attrs.each do |key, value|
     puts "#{key}: #{value}"
   end
-  puts "\nAttributes from as_json:"
   bank.as_json.each do |key, value|
     puts "#{key}: #{value}"
   end
@@ -59,7 +73,6 @@ bank = Bank.new(
 )
 
 # Print serialized attributes before saving
-puts "Before Save:"
 expect_serialized_attributes(bank)
 
 # Save the bank record to Couchbase
@@ -69,78 +82,13 @@ bank.save!
 bank.reload
 
 # Print serialized attributes after reloading
-puts "\nAfter Reload:"
 expect_serialized_attributes(bank)
 
 # Find the bank record by ID
 found_bank = Bank.find(bank.id)
 
 # Print serialized attributes after finding
-puts "\nAfter Find:"
 expect_serialized_attributes(found_bank)
-
-```
-
-In this example, we create a new `Bank` instance with encrypted attributes for `account_number` and `routing_number`. We then save the bank record to Couchbase, reload it, and find it by ID. We print the serialized attributes before saving, after reloading, and after finding the record to demonstrate the encryption and decryption process.
-
-Output:
-```
-Before Save:
-Serialized Attributes:
-id: 
-name: Test Bank
-encrypted$account_number: {:alg=>"CB_MOBILE_CUSTOM", :ciphertext=>"MTIzNDU2Nzg5"}
-encrypted$routing_number: {:alg=>"3DES", :ciphertext=>"OTg3NjU0MzIx"}
-
-Attributes from JSON:
-id: 
-name: Test Bank
-account_number: MTIzNDU2Nzg5
-routing_number: OTg3NjU0MzIx
-
-Attributes from as_json:
-id: 
-name: Test Bank
-account_number: MTIzNDU2Nzg5
-routing_number: OTg3NjU0MzIx
-
-After Reload:
-Serialized Attributes:
-id: bank-1-vpbKLPzAg
-name: Test Bank
-encrypted$account_number: {:alg=>"CB_MOBILE_CUSTOM", :ciphertext=>"MTIzNDU2Nzg5"}
-encrypted$routing_number: {:alg=>"3DES", :ciphertext=>"OTg3NjU0MzIx"}
-
-Attributes from JSON:
-id: bank-1-vpbKLPzAg
-name: Test Bank
-account_number: MTIzNDU2Nzg5
-routing_number: OTg3NjU0MzIx
-
-Attributes from as_json:
-id: bank-1-vpbKLPzAg
-name: Test Bank
-account_number: MTIzNDU2Nzg5
-routing_number: OTg3NjU0MzIx
-
-After Find:
-Serialized Attributes:
-id: bank-1-vpbKLPzAg
-name: Test Bank
-encrypted$account_number: {:alg=>"CB_MOBILE_CUSTOM", :ciphertext=>"MTIzNDU2Nzg5"}
-encrypted$routing_number: {:alg=>"3DES", :ciphertext=>"OTg3NjU0MzIx"}
-
-Attributes from JSON:
-id: bank-1-vpbKLPzAg
-name: Test Bank
-account_number: MTIzNDU2Nzg5
-routing_number: OTg3NjU0MzIx
-
-Attributes from as_json:
-id: bank-1-vpbKLPzAg
-name: Test Bank
-account_number: MTIzNDU2Nzg5
-routing_number: OTg3NjU0MzIx
 ```
 
 ## 11.3. Encryption and Decryption Process

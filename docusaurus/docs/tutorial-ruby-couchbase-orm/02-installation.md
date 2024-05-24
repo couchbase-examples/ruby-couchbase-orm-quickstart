@@ -8,7 +8,7 @@ Before installing Couchbase ORM, ensure that you have the following prerequisite
 
 1. **Ruby**: Couchbase ORM requires Ruby version 2.7 or higher. You can check your Ruby version by running the following command in your terminal:
 
-   ```
+   ```sh
    ruby -v
    ```
 
@@ -20,7 +20,7 @@ Before installing Couchbase ORM, ensure that you have the following prerequisite
 
 3. **Bundler** (optional): Bundler is a dependency management tool for Ruby. While not strictly required, it is recommended to use Bundler to manage your Ruby project's dependencies. You can install Bundler by running the following command:
 
-   ```
+   ```sh
    gem install bundler
    ```
 
@@ -75,16 +75,18 @@ To use Couchbase ORM in your Ruby application, you need to configure the connect
      username: my_username
      password: my_password
 
-   production:
-     connection_string: couchbase://localhost
-     bucket: my_app_production
-     username: my_username
-     password: my_password
+    production:
+      connection_string: <%= ENV['COUCHBASE_CONNECTION_STRING'] %>
+      bucket: <%= ENV['COUCHBASE_BUCKET'] %>
+      username: <%= ENV['COUCHBASE_USER'] %>
+      password: <%= ENV['COUCHBASE_PASSWORD'] %>
    ```
 
    Replace the values for `connection_string`, `bucket`, `username`, and `password` with your actual Couchbase Server connection details.
 
    Couchbase ORM will automatically load the configuration based on the current Rails environment.
+
+   You can also set the connection details using environment variables in the production environment to avoid storing sensitive information in the source code.
 
 2. **Non-Rails Applications**:
 

@@ -67,8 +67,6 @@ Here's an example of using attribute options:
 ```ruby
 class User < CouchbaseOrm::Base
   attribute :name, :string, default: 'Unknown'
-  # attribute :email, :string, alias: :contact_email
-  # attribute :age, :integer, readonly: true
 end
 ```
 

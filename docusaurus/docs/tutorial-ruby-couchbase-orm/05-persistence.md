@@ -13,20 +13,16 @@ class Task < CouchbaseOrm::Base
   attribute :completed, :boolean, default: false
 end
 
-task1 = Task.new(title: 'Task 1', description: 'Description of Task 1')
-task1.save
-puts "Task 1 created with id: #{task1.id}, #{task1.inspect}"
+task = Task.new(title: 'Task 1', description: 'Description of Task 1')
+task.save
 ```
 
 Alternatively, you can use the `create` method to create a new record in a single step:
 
 ```ruby
-task1 = Task.create(title: 'Task 1', description: 'Description of Task 1')
+task = Task.create(title: 'Task 1', description: 'Description of Task 1')
 ```
-Output of the above code:
-```
-Task 1 created with id: task-1-tLJM721QY, #<Task id: "task-1-tLJM721QY", title: "Task 1", description: "Description of Task 1", completed: false>
-```
+
 
 The `create` method instantiates a new instance of the model, sets the attributes, and saves it to the database.
 
@@ -36,16 +32,12 @@ The `save` method is used to persist a record to the database, whether it's a ne
 
 ```ruby
 # Update an existing task
-task2 = Task.create(title: 'Task 2', description: 'Description of Task 2')
-task2.description = 'Updated description of Task 2'
-task2.save
-puts "Task 2 updated with id: #{task2.id}, #{task2.inspect}"
+task = Task.create(title: 'Task 2', description: 'Description of Task 2')
+task.description = 'Updated description of Task 2'
+task.save
 ```
 
-Output of the above code:
-```
-Task 2 updated with id: task-1-tLJM895Xq, #<Task id: "task-1-tLJM895Xq", title: "Task 2", description: "Updated description of Task 2", completed: false>
-```
+
 
 If the record is new (i.e., it doesn't have an ID), `save` will create a new document in Couchbase Server. If the record already exists, `save` will update the existing document with the modified attributes.
 
@@ -55,14 +47,8 @@ To update an existing record, you can modify its attributes and then call the `s
 
 ```ruby
 # Update specific fields of a task
-task3 = Task.create(title: 'Task 3', description: 'Description of Task 3')
-task3.update(description: 'Updated description of Task 3', completed: true)
-puts "Task 3 updated with id: #{task3.id}, #{task3.inspect}"
-```
-
-Output of the above code:
-```
-Task 3 updated with id: task-1-tLJMA6cBp, #<Task id: "task-1-tLJMA6cBp", title: "Task 3", description: "Updated description of Task 3", completed: true>
+task = Task.create(title: 'Task 3', description: 'Description of Task 3')
+task.update(description: 'Updated description of Task 3', completed: true)
 ```
 
 CouchbaseOrm automatically tracks the changes made to the attributes and updates only the modified fields in the database.

@@ -14,15 +14,6 @@ end
 
 In this example, we define an enum named `status` for the `User` model. The enum has three possible values: `:active`, `:inactive`, and `:suspended`.
 
-CouchbaseOrm automatically generates a set of methods for each enum value:
-
-- `active?`: Returns `true` if the `status` is `:active`.
-- `inactive?`: Returns `true` if the `status` is `:inactive`.
-- `suspended?`: Returns `true` if the `status` is `:suspended`.
-- `active!`: Sets the `status` to `:active`.
-- `inactive!`: Sets the `status` to `:inactive`.
-- `suspended!`: Sets the `status` to `:suspended`.
-
 ## 10.2. Using Enums
 
 You can assign enum values to an attribute using the generated methods or by directly assigning the value.
@@ -36,7 +27,6 @@ user.suspended!
 user.save
 
 puts user.status  # Output: "suspended"
-puts user.active? # Output: false
 ```
 
 In this example, we create a new `User` instance and set the `status` to `:active` using the direct assignment. We then change the `status` to `:suspended` using the generated `suspended!` method.
