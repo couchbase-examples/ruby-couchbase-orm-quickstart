@@ -19,7 +19,7 @@ function HomepageHeader() {
         <div className={styles.buttons}>
           <Link
             className="button button--secondary button--lg"
-            to="/docs/introduction">
+            to="/docs/tutorial-ruby-couchbase-orm/introduction">
             Get Started with Couchbase - 5min ⏱️
           </Link>
         </div>
