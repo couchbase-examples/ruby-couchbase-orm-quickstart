@@ -1,54 +1,158 @@
 # Views (aka Map/Reduce indexes)
 
-Views are defined in the model and typically just emit an attribute that
-can then be used for filtering results or ordering.
+Views are a powerful feature in Couchbase that allow you to define map functions to extract and emit specific data from your documents. The Ruby Couchbase ORM provides a convenient way to define and query views within your Ruby application.
+
+## 8.1 Defining Views
+
+To define a view in your Ruby Couchbase ORM model, you can use the `view` method followed by the view name and options. Here's an example:
 
 ```ruby
-    class Comment < CouchbaseOrm::Base
-      attribute :author :string
-      attribute :body, :string
-      view :all # => emits :id and will return all comments
-      view :by_author, emit_key: :author
+class Factory < CouchbaseOrm::Base
+  attribute :name, type: String
+  attribute :location, type: String
+  attribute :established_year, type: Integer
+  attribute :active, type: Boolean
 
-      # Generates two functions:
-      # * the by_author view above
-      # * def find_by_author(author); end
-      index_view :author
-
-      # You can make compound keys by passing an array to :emit_key
-      # this allow to query by read/unread comments
-      view :by_read, emit_key: [:user_id, :read]
-      # this allow to query by view_count
-      view :by_view_count, emit_key: [:user_id, :view_count]
-
-      validates_presence_of :author, :body
-    end
+  view :by_name, emit_key: :name
+  view :by_location, emit_key: :location
+  view :by_established_year, emit_key: :established_year
+  view :by_active, emit_key: :active
+end
 ```
 
-You can use `Comment.find_by_author('name')` to obtain all the comments by
-a particular author. The same thing, using the view directly would be:
-`Comment.by_author(key: 'name')`
+In this example, we define four views for the `Factory` model:
+- `by_name`: Emits the `name` attribute as the key.
+- `by_location`: Emits the `location` attribute as the key.
+- `by_established_year`: Emits the `established_year` attribute as the key.
+- `by_active`: Emits the `active` attribute as the key.
 
-When using a compound key, the usage is the same, you just give the full key :
+The `emit_key` option specifies the attribute to use as the key for the view.
+
+## 8.2 Custom Map Functions
+
+You can also define custom map functions for your views using the `map` option. This allows you to emit custom keys and values based on your specific requirements. Here's an example:
 
 ```ruby
-   Comment.by_read(key: '["'+user_id+'",false]') # gives all unread comments for one particular user
-
-   # or even a range !
-
-   Comment.by_view_count(startkey: '["'+user_id+'",10]', endkey: '["'+user_id+'",20]') 
-   
-   # gives all comments that have been seen more than 10 times but less than 20
+view :by_name_and_location,
+  map: %{
+    function(doc) {
+      if (doc.type === "factory") {
+        emit([doc.name, doc.location], null);
+      }
+    }
+  }
 ```
 
-Ex : Compound keys allows to decide the order of the results, and you can reverse it by passing `descending: true`
+In this example, we define a view named `by_name_and_location` that emits a composite key consisting of the `name` and `location` attributes.
+
+## 8.3 Querying Views
+
+Once you have defined your views, you can query them using the corresponding view methods. The view methods are automatically generated based on the view names. Here are some examples:
 
 ```ruby
-    class Comment < CouchbaseOrm::Base19
-      self.ignored_properties = [:old_name] # ignore old_name property in the model
-      self.properties_always_exists_in_document = true # use is null for nil value instead of not valued for performance purpose, only possible if all properties always exists in document
-    end
-```      
-You can specify `properties_always_exists_in_document` to true if all properties always exists in document, this will allow to use `is null` instead of `not valued` for nil value, this will improve performance. 
+# Query factories by name
+Factory.by_name(key: 'Factory A').each do |factory|
+  puts "- #{factory.name}"
+end
 
-WARNING: If a document exists without a property, the query will failed! So you must be sure that all documents have all properties.
+# Query factories by location
+Factory.by_location(key: 'City X').each do |factory|
+  puts "- #{factory.name}"
+end
+
+# Query factories by established year
+Factory.by_established_year(key: 2010).each do |factory|
+  puts "- #{factory.name}"
+end
+
+# Query active factories
+Factory.by_active(key: true).each do |factory|
+  puts "- #{factory.name}"
+end
+```
+
+These examples demonstrate how to query views based on specific keys using the generated view methods.
+
+## Indexing Views
+
+In this section, let's explore the `index_view` function and the methods it generates for the `location` attribute.
+
+Here's an updated version of the `Factory` model using `index_view` for the `location` attribute:
+
+```ruby
+class Factory < CouchbaseOrm::Base
+  attribute :name, type: String
+  attribute :location, type: String
+  attribute :established_year, type: Integer
+  attribute :active, type: Boolean
+
+  view :by_name, emit_key: :name
+  index_view :location
+  view :by_established_year, emit_key: :established_year
+  view :by_active, emit_key: :active
+
+  view :by_name_and_location,
+    map: %{
+      function(doc) {
+        if (doc.type === "factory") {
+          emit([doc.name, doc.location], null);
+        }
+      }
+    }
+
+  view :by_established_year_range,
+    map: %{
+      function(doc) {
+        if (doc.type === "factory" && doc.established_year) {
+          emit(doc.established_year, null);
+        }
+      }
+    }
+end
+```
+
+In this updated code, we replaced `view :by_location, emit_key: :location` with `index_view :location`. The `index_view` function generates two methods for querying based on the `location` attribute:
+
+1. `find_by_location(location)`: This method allows you to find factories by a specific location. It returns an array of factories that match the given location.
+
+2. `by_location(key: location)`: This method is similar to `find_by_location` but returns a `CouchbaseOrm::ResultsProxy` object, which provides an enumerable interface to access the view results.
+
+Now, let's see how we can use these generated methods to query factories by location:
+
+```ruby
+# Find factories by location using find_by_location
+factories = Factory.find_by_location('City X')
+factories.each do |factory|
+  puts "- #{factory.name} (#{factory.location})"
+end
+
+# Find factories by location using by_location
+Factory.by_location(key: 'City X').each do |factory|
+  puts "- #{factory.name} (#{factory.location})"
+end
+```
+
+Both `find_by_location` and `by_location` achieve the same result of finding factories by a specific location. The difference is that `find_by_location` returns an array of factories directly, while `by_location` returns a `CouchbaseOrm::ResultsProxy` object that you can further chain or iterate over.
+
+Using `index_view` provides a convenient way to generate commonly used query methods for a specific attribute. It simplifies the process of querying based on that attribute and enhances the readability of your code.
+
+<!-- ## 8.5 Range Queries (Experimental)
+
+You can perform range queries on views by specifying the `startkey` and `endkey` options. Here's an example:
+
+```ruby
+# Query factories established between 2005 and 2015
+Factory.by_established_year_range(startkey: 2005, endkey: 2015).each do |factory|
+  puts "- #{factory.name} (#{factory.established_year})"
+end
+```
+
+In this example, we query the `by_established_year_range` view to retrieve factories established between 2005 and 2015. -->
+
+## 8.5 Conclusion
+
+Views in the Ruby Couchbase ORM provide a powerful way to define and query data based on specific attributes and custom map functions. By defining views, you can easily retrieve subsets of your data and perform efficient queries based on your application's requirements.
+
+Remember to ensure that your design documents are up to date by calling `ensure_design_document!` on your models before running queries.
+
+With the flexibility and ease of use provided by the Ruby Couchbase ORM's view functionality, you can efficiently query and retrieve data from your Couchbase database.
