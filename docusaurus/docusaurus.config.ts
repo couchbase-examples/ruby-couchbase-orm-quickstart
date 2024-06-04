@@ -8,17 +8,18 @@ const config: Config = {
   favicon: 'img/logo.svg',
 
   // Set the production url of your site here
-  url: 'https://couchbase-examples.github.io/',
+  url: 'https://ruby-cb-orm.com',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/ruby-couchbase-orm-quickstart/',
+  baseUrl: '/',
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
   organizationName: 'couchbase-examples', // Usually your GitHub org/user name.
   projectName: 'ruby-couchbase-orm-quickstart', // Usually your repo name.
+  trailingSlash: false,
 
-  onBrokenLinks: 'ignore', // TODO: 'throw' when all links are fixed
+  onBrokenLinks: 'warn', // TODO: 'throw' when all links are fixed
   onBrokenMarkdownLinks: 'warn',
 
   // Even if you don't use internationalization, you can use this field to set
@@ -34,13 +35,13 @@ const config: Config = {
       'classic',
       {
         docs: {
-          sidebarPath: './sidebars.ts',
+          sidebarPath: require.resolve('./sidebars.ts'),
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl: `https://github.com/couchbase-examples/ruby-couchbase-orm-quickstart/tree/docs/docusaurus/docusaurus/docs`,
         },
         theme: {
-          customCss: './src/css/custom.css',
+          customCss: require.resolve('./src/css/custom.css'),
         },
       } satisfies Preset.Options,
     ],
