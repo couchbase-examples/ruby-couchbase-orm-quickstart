@@ -73,7 +73,7 @@ end
 
 These examples demonstrate how to query views based on specific keys using the generated view methods.
 
-## Indexing Views
+## 8.4 Indexing Views
 
 In this section, let's explore the `index_view` function and the methods it generates for the `location` attribute.
 

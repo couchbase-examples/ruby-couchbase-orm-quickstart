@@ -64,7 +64,7 @@ const config: Config = {
           label: 'Tutorial',
         },
         {
-          href: 'https://github.com/facebook/docusaurus',
+          href: 'https://github.com/Couchbase-Ecosystem/ruby-orm',
           label: 'GitHub',
           position: 'right',
         },
