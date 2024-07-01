@@ -1,0 +1,16 @@
+common: &common
+  bucket: travel-sample
+  connection_string: <%= ENV['DB_CONN_STR'] %>
+  username: <%= ENV['DB_USERNAME'] %>
+  password: <%= ENV['DB_PASSWORD'] %>
+
+development:
+  connection_string: couchbase://localhost
+  username: kaustav
+  password: password
+
+test:
+  <<: *common
+
+production:
+  <<: *common
