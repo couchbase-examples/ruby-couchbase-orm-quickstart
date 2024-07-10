@@ -126,7 +126,6 @@ RSpec.describe 'Airports API', type: :request do
       rescue StandardError => e
         puts e
       ensure
-        puts "Deleting airport with ID #{airport_id}"
         delete "/api/v1/airports/#{airport_id}"
       end
     end
