@@ -33,7 +33,7 @@ To install Couchbase ORM, you have a couple of options:
 1. **Using Bundler** (recommended): If you're using Bundler to manage your project's dependencies, add the following line to your `Gemfile`:
 
    ```ruby
-   gem 'couchbase-orm', git: 'https://github.com/doctolib/couchbase-orm'
+   gem 'couchbase-orm', git: 'https://github.com/Couchbase-Ecosystem/couchbase-ruby-orm'
    ```
 
    Then, run the following command to install the gem:

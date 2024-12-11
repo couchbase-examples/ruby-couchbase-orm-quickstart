@@ -30,7 +30,7 @@ gem 'jbuilder'
 gem 'rswag'
 
 # Ruby Couchbase ORM
-gem 'couchbase-orm', git: 'https://github.com/doctolib/couchbase-orm'
+gem 'couchbase-orm', git: 'https://github.com/Couchbase-Ecosystem/couchbase-ruby-orm'
 
 # Use Redis adapter to run Action Cable in production
 # gem "redis", ">= 4.0.1"
