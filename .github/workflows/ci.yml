@@ -7,6 +7,7 @@ on:
     branches: [main]
   schedule:
     - cron: "50 9 * * *"
+  workflow_dispatch:
 
 jobs:
   run_tests:
@@ -23,12 +24,30 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.3.0
+          ruby-version: 3.4.1
+          bundler-cache: true
       - name: Install dependencies
         run: bundle install
 
-      - name: Run tests
-        run: bundle exec rspec test/integration
+      - name: Validate Couchbase configuration
+        run: |
+          if [ -z "$DB_CONN_STR" ] || [ -z "$DB_USERNAME" ] || [ -z "$DB_PASSWORD" ]; then
+            echo "Error: Missing required Couchbase configuration"
+            echo "DB_CONN_STR, DB_USERNAME, and DB_PASSWORD must all be set"
+            exit 1
+          fi
+          echo "Couchbase configuration validated successfully"
+
+      - name: Run integration tests
+        run: bundle exec rspec spec/requests/api/v1
+
+      - name: Verify Swagger documentation generates
+        run: bundle exec rake rswag:specs:swaggerize
+        env:
+          DB_CONN_STR: ${{ vars.DB_CONN_STR }}
+          DB_USERNAME: ${{ vars.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          CI: true
 
       - name: Report Status
         if: always()
