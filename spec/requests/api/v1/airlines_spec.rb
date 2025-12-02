@@ -166,7 +166,7 @@ RSpec.describe 'Airlines API', type: :request do
         { 'callsign' => 'AIRCALIN', 'country' => 'France', 'iata' => 'SB', 'icao' => 'ACI',
           'name' => 'Air Caledonie International' },
         { 'callsign' => 'T&', 'country' => 'France', 'iata' => '&T', 'icao' => 'T&O',
-          'name' => "Tom's & co airliners" },
+          'name' => "Tom\\'s & co airliners" },
         { 'callsign' => 'BRITAIR', 'country' => 'France', 'iata' => 'DB', 'icao' => 'BZH', 'name' => 'Brit Air' },
         { 'callsign' => 'Vickjet', 'country' => 'France', 'iata' => 'KT', 'icao' => 'VKJ', 'name' => 'VickJet' },
         { 'callsign' => 'CORSAIR', 'country' => 'France', 'iata' => 'SS', 'icao' => 'CRL', 'name' => 'Corsairfly' },
