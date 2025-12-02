@@ -15,7 +15,7 @@ To run this prebuilt project, you will need:
 
 - [Couchbase Capella cluster](https://www.couchbase.com/products/capella/) with [travel-sample bucket](https://docs.couchbase.com/ruby-sdk/current/ref/travel-app-data-model.html) loaded.
 - To run this tutorial using a [self-managed Couchbase cluster](https://docs.couchbase.com/capella/current/getting-started/self-managed-cluster.html), please refer to the appendix.
-- [Ruby 3.3.0](https://www.ruby-lang.org/en/documentation/installation/) is installed on the local machine.
+- [Ruby 3.4.1](https://www.ruby-lang.org/en/documentation/installation/) is installed on the local machine.
 - Basic knowledge of [Ruby](https://www.ruby-lang.org/en/documentation/), [Ruby on Rails](https://rubyonrails.org/), and [RSpec](https://rspec.info/).
 
 ## Loading Travel Sample Bucket
@@ -48,7 +48,27 @@ To learn more about connecting to your Capella cluster, please follow the instru
 
 Specifically, you need to do the following:
 
-Open the `config/couchbase.yml` file and update the connection string, username, password, and bucket name for the development and test environments.
+#### For Development and Test Environments
+
+Copy the `dev.env.example` file to `dev.env` and update the connection details:
+
+```sh
+cp dev.env.example dev.env
+```
+
+Edit `dev.env` with your Couchbase credentials:
+
+```sh
+DB_USERNAME="your_username"
+DB_PASSWORD="your_password"
+DB_CONN_STR="couchbases://your-cluster.cloud.couchbase.com"
+```
+
+The application will automatically load these environment variables in development and test environments.
+
+#### Configuration File Reference
+
+The `config/couchbase.yml` file defines how the application connects to Couchbase:
 
 ```yml
 common: &common
@@ -109,13 +129,104 @@ The application will run on the port specified by Rails on your local machine (e
 
 ## Running The Tests
 
-The application comes with a set of integration tests that can be run to verify the functionality of the application. The tests are written using RSpec, a popular testing framework for Ruby.
+The application includes two types of tests:
 
-To run the tests, you can use the following command:
+### Integration Tests
+
+Integration tests verify the actual functionality of the API endpoints. They test the full request-response cycle including database operations.
 
 ```sh
-bundle exec rspec test/integration
+bundle exec rspec spec/requests/api/v1
 ```
+
+### Swagger Documentation Tests
+
+These tests generate the OpenAPI/Swagger documentation and verify the API contract without performing full integration testing.
+
+```sh
+bundle exec rake rswag:specs:swaggerize
+```
+
+## Health Check Endpoint
+
+The application provides a health check endpoint to monitor the status of the service and its dependencies:
+
+```sh
+GET /api/v1/health
+```
+
+This endpoint returns the health status of the application and its connection to Couchbase. Example response:
+
+```json
+{
+  "status": "healthy",
+  "timestamp": "2025-12-02T10:30:00Z",
+  "services": {
+    "couchbase": {
+      "status": "up",
+      "message": "Connected to Couchbase bucket: travel-sample"
+    }
+  }
+}
+```
+
+You can use this endpoint for monitoring and alerting in production environments.
+
+## Troubleshooting
+
+### Couchbase ORM Connection Issues
+
+If you encounter connection issues with Couchbase ORM, verify the following:
+
+1. **Check configuration**: Ensure `config/couchbase.yml` has the correct connection string, username, and password.
+2. **Connection string format**: The connection string should start with `couchbase://` (for non-TLS) or `couchbases://` (for TLS).
+3. **Bucket access**: Verify that the user has read/write permissions to the travel-sample bucket.
+4. **Network connectivity**: Ensure your application can reach the Couchbase cluster on the required ports (typically 8091-8096, 11210).
+
+### Common couchbase-orm Errors
+
+**Error: `Couchbase::Error::BucketNotFound`**
+- The specified bucket doesn't exist or isn't accessible
+- Solution: Verify the bucket name in `config/couchbase.yml` and ensure the travel-sample bucket is loaded
+
+**Error: `Couchbase::Error::AuthenticationFailure`**
+- Invalid credentials
+- Solution: Check username and password in `config/couchbase.yml` or environment variables
+
+**Error: `Couchbase::Error::Timeout`**
+- Network connectivity issues or cluster overload
+- Solution: Check network connectivity, increase timeout in connection options, or verify cluster health
+
+**Error: `NoMethodError: undefined method 'bucket' for Model`**
+- ORM not properly initialized
+- Solution: Ensure `config/couchbase.yml` is correctly configured and the Rails application has loaded the configuration
+
+### Test Setup Issues
+
+**Tests failing with connection errors:**
+- Ensure environment variables `DB_CONN_STR`, `DB_USERNAME`, and `DB_PASSWORD` are set for the test environment
+- Verify the travel-sample bucket is loaded and accessible
+- Check that the test configuration in `config/couchbase.yml` references these environment variables
+
+**Swagger generation fails:**
+- Run `bundle exec rake rswag:specs:swaggerize` with proper environment variables
+- Check that all swagger specs in `spec/requests/swagger/` are valid
+
+### CI/CD Configuration
+
+When setting up GitHub Actions or other CI/CD pipelines:
+
+1. Set required secrets/variables:
+   - `DB_CONN_STR`: Connection string to your Couchbase cluster
+   - `DB_USERNAME`: Username with bucket access
+   - `DB_PASSWORD`: Password (set as a secret, not a variable)
+
+2. Ensure the CI environment can access your Couchbase cluster (check firewall rules and allowed IP addresses)
+
+3. The CI workflow runs:
+   - Configuration validation
+   - Integration tests: `bundle exec rspec spec/requests/api/v1`
+   - Swagger generation: `bundle exec rake rswag:specs:swaggerize`
 
 # Appendix
 
@@ -151,53 +262,64 @@ If you would like to add another entity to the APIs, follow these steps:
    - Implement the necessary CRUD actions (index, show, create, update, destroy) in the controller.
    - Example: `app/controllers/api/v1/customers_controller.rb`
 
-4. Add Swagger documentation:
-   - Open the `spec/requests/api/v1/customers_spec.rb` file.
+4. Add Swagger documentation (for API documentation only):
+   - Create a new swagger spec file in `spec/requests/swagger/customers_spec.rb`.
    - Define the Swagger documentation for the new entity's API endpoints using RSpec and the `rswag` gem.
-   - Specify the request and response parameters, headers, and schemas for each endpoint.
+   - These specs should be documentation-only (no actual database operations).
    - Example:
      ```ruby
      require 'swagger_helper'
 
+     # Documentation-only specs for Swagger/OpenAPI generation
+     # Actual integration testing done in spec/requests/api/v1/customers_spec.rb
      describe 'Customers API', type: :request do
-       path '/api/v1/customers' do
-         get 'Retrieves all customers' do
+       path '/api/v1/customers/{id}' do
+         get 'Retrieves a customer' do
            tags 'Customers'
            produces 'application/json'
+           parameter name: :id, in: :path, type: :string
 
-           response '200', 'customers retrieved' do
-             schema type: :array,
-                    items: {
-                      type: :object,
-                      properties: {
-                        id: { type: :integer },
-                        name: { type: :string },
-                        email: { type: :string }
-                      },
-                      required: ['id', 'name', 'email']
-                    }
+           response '200', 'customer found' do
+             schema type: :object,
+                    properties: {
+                      name: { type: :string },
+                      email: { type: :string }
+                    },
+                    required: ['name', 'email']
 
-             run_test!
+             let(:id) { 'customer_123' }
+             run_test! do |response|
+               # Documentation-only - actual testing in spec/requests/api/v1/customers_spec.rb
+             end
            end
          end
        end
      end
      ```
 
-5. Add integration tests:
-   - Create a new integration test file for the entity in the `test/integration` folder.
-   - Write integration tests to cover the CRUD operations of the new entity.
-   - Example: `test/integration/customers_spec.rb`
+5. Add integration tests (for actual functionality testing):
+   - Create a new integration test file for the entity in the `spec/requests/api/v1/` folder.
+   - Write comprehensive integration tests to verify CRUD operations work correctly.
+   - Example: `spec/requests/api/v1/customers_spec.rb`
      ```ruby
      require 'rails_helper'
 
      RSpec.describe 'Customers API', type: :request do
-       describe 'GET /api/v1/customers' do
-         # Add tests for retrieving customers
+       describe 'GET /api/v1/customers/{id}' do
+         it 'returns the customer' do
+           get '/api/v1/customers/customer_123'
+           expect(response).to have_http_status(:ok)
+           # Add more assertions
+         end
        end
 
-       describe 'POST /api/v1/customers' do
-         # Add tests for creating a customer
+       describe 'POST /api/v1/customers/{id}' do
+         it 'creates a customer' do
+           post '/api/v1/customers/customer_new', params: { customer: { name: 'Test', email: 'test@example.com' } }
+           expect(response).to have_http_status(:created)
+           # Clean up
+           delete '/api/v1/customers/customer_new'
+         end
        end
 
        # Add more tests for other CRUD operations
@@ -205,8 +327,9 @@ If you would like to add another entity to the APIs, follow these steps:
      ```
 
 6. Run tests and verify:
-   - Run the integration tests using the command `bundle exec rspec test/integration`.
-   - Ensure that all tests pass and the new entity's CRUD operations are working as expected.
+   - Run the integration tests: `bundle exec rspec spec/requests/api/v1/customers_spec.rb`
+   - Generate swagger documentation: `bundle exec rake rswag:specs:swaggerize`
+   - Ensure that all tests pass and the new entity's CRUD operations work correctly.
 
 By following these steps, you can systematically extend the API functionality with a new entity while maintaining a well-structured and tested codebase.
 

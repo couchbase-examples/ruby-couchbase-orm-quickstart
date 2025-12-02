@@ -6,6 +6,12 @@ require 'rails/all'
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
+# Load environment variables from dev.env in development and test environments
+if ENV['RAILS_ENV'] != 'production'
+  require 'dotenv'
+  Dotenv.load('dev.env')
+end
+
 module RubyCouchbaseOrmQuickstart
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.

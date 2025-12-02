@@ -4,6 +4,9 @@ Rails.application.routes.draw do
 
   namespace :api do
     namespace :v1 do
+      # Health check endpoint
+      get 'health', to: 'health#show'
+
       # Airlines resource routes
       get 'airlines/list', to: 'airlines#index'
       get 'airlines/to-airport', to: 'airlines#to_airport'

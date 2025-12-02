@@ -1,6 +1,51 @@
 version: 2
 updates:
+  # Keep bundler dependencies up to date
   - package-ecosystem: "bundler"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+    groups:
+      # Group Rails and related gems together
+      rails:
+        patterns:
+          - "rails*"
+          - "actionpack"
+          - "actionview"
+          - "activerecord"
+          - "activejob"
+          - "actioncable"
+          - "actionmailer"
+          - "activestorage"
+          - "actionmailbox"
+          - "actiontext"
+      # Group testing gems together
+      testing:
+        patterns:
+          - "rspec*"
+          - "capybara"
+          - "selenium-webdriver"
+    labels:
+      - "dependencies"
+      - "ruby"
+    open-pull-requests-limit: 10
+
+  # Keep GitHub Actions up to date
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    open-pull-requests-limit: 5
+
+  # Keep Docker base image up to date
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "docker"
+    open-pull-requests-limit: 5

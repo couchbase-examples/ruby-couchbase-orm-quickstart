@@ -1,5 +1,5 @@
-# Use the official Ruby 3.0.0 image as the base image
-FROM ruby:3.3.0
+# Use the official Ruby 3.4.1 image as the base image
+FROM ruby:3.4.1
 
 # Install essential Linux packages
 RUN apt-get update -qq && \
