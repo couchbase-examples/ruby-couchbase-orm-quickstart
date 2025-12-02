@@ -1,6 +1,23 @@
 require_relative 'boot'
 
-require 'rails/all'
+# Load Rails components individually (excluding activerecord since we use Couchbase via couchbase-orm)
+require 'rails'
+%w(
+  action_controller
+  action_view
+  action_mailer
+  active_job
+).each do |framework|
+  begin
+    require "#{framework}/railtie"
+  rescue LoadError
+  end
+end
+
+# Excluded components (using Couchbase instead of ActiveRecord):
+# - active_record/railtie - Using Couchbase via couchbase-orm
+# - active_storage/engine - Not needed for API-only app
+# - action_cable/railtie - Not using WebSockets
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
