@@ -91,6 +91,91 @@ production:
 
 > Note: The connection string expects the `couchbases://` or `couchbase://` part.
 
+## Couchbase Index Management
+
+This application requires specific N1QL indexes on the `travel-sample` bucket to function correctly. These indexes optimize the SQL++ queries used by the application for filtering and joining documents.
+
+### Automatic Index Setup
+
+Indexes are automatically created when you:
+
+- Run `bin/setup` for local development setup
+- Run tests in CI/CD (GitHub Actions automatically creates indexes before running tests)
+
+The application uses idempotent index creation (using `CREATE INDEX IF NOT EXISTS`), so it's safe to run the setup multiple times.
+
+### Required Indexes
+
+The application requires the following indexes on the `travel-sample` bucket:
+
+1. **`idx_type`** - General index on the `type` field for all document queries
+2. **`idx_type_country`** - Index for airline queries filtered by country (`Airline.list_by_country_or_all`)
+3. **`idx_type_destinationairport`** - Index for route queries by destination airport (`Airline.to_airport`)
+4. **`idx_type_sourceairport_stops`** - Index for route queries by source airport and stops (`Route.direct_connections`)
+5. **`idx_type_airlineid`** - Index for airline queries by airline ID (used in joins with routes)
+
+### Manual Index Management
+
+You can manually manage indexes using the following Rake tasks:
+
+#### Create All Required Indexes
+
+```sh
+bundle exec rake couchbase:setup_indexes
+```
+
+This command creates all required indexes on the `travel-sample` bucket. It's idempotent and safe to run multiple times.
+
+#### List All Indexes
+
+```sh
+bundle exec rake couchbase:list_indexes
+```
+
+This command lists all indexes currently present in the `travel-sample` bucket, including their state, type, and indexed fields.
+
+#### Drop Application Indexes
+
+```sh
+bundle exec rake couchbase:drop_indexes
+```
+
+This command drops all application-managed indexes. It requires confirmation before executing. For automated scripts, you can force the operation:
+
+```sh
+FORCE_DROP=true bundle exec rake couchbase:drop_indexes
+```
+
+> **Warning**: Use with caution! Dropping indexes will cause queries to fail until indexes are recreated.
+
+### Troubleshooting Index Issues
+
+If you encounter index-related errors:
+
+1. **Verify indexes exist**:
+   ```sh
+   bundle exec rake couchbase:list_indexes
+   ```
+
+2. **Check index state**: Indexes should be in "online" state. If they're "building" or "pending", wait for them to complete.
+
+3. **Recreate indexes**:
+   ```sh
+   bundle exec rake couchbase:drop_indexes
+   bundle exec rake couchbase:setup_indexes
+   ```
+
+4. **Check permissions**: Ensure your Couchbase user has "Query Manage Index" permission to create and drop indexes.
+
+### Index Creation in CI/CD
+
+The GitHub Actions workflow automatically creates indexes before running tests. If index creation fails in CI:
+
+1. Check the "Setup Couchbase indexes" step in the GitHub Actions log
+2. Verify that `DB_CONN_STR`, `DB_USERNAME`, and `DB_PASSWORD` secrets/variables are correctly set
+3. Ensure the Couchbase user has "Query Manage Index" permission
+4. Check that the Couchbase cluster is accessible from GitHub Actions runners
+
 ## Running The Application
 
 ### Directly on machine

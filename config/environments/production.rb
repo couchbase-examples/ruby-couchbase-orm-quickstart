@@ -27,7 +27,7 @@ Rails.application.configure do
   # config.assets.css_compressor = :sass
 
   # Do not fall back to assets pipeline if a precompiled asset is missed.
-  config.assets.compile = false
+  # config.assets.compile = false  # Commented out - not using asset pipeline
 
   # Enable serving of images, stylesheets, and JavaScripts from an asset server.
   # config.asset_host = "http://assets.example.com"
@@ -85,7 +85,7 @@ Rails.application.configure do
   config.active_support.report_deprecations = false
 
   # Do not dump schema after migrations.
-  config.active_record.dump_schema_after_migration = false
+  # config.active_record.dump_schema_after_migration = false  # Commented out - not using ActiveRecord
 
   # Enable DNS rebinding protection and other `Host` header attacks.
   # config.hosts = [
