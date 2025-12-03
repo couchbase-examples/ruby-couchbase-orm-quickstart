@@ -28,6 +28,6 @@ class Route < CouchbaseOrm::Base
   validates :distance, presence: true, numericality: { greater_than_or_equal_to: 0 }
 
   n1ql :direct_connections, query_fn: proc { |bucket, values, options|
-    cluster.query("SELECT distinct raw meta(route).id FROM `#{bucket.name}` AS airport JOIN `#{bucket.name}` AS route ON route.sourceairport = airport.faa WHERE airport.faa = #{quote(values[0])} AND route.stops = 0 LIMIT #{values[1]} OFFSET #{values[2]}", options)
+    cluster.query("SELECT distinct raw meta(route).id FROM `#{bucket.name}` AS airport JOIN `#{bucket.name}` AS route ON route.sourceairport = airport.faa AND route.type = 'route' WHERE airport.type = 'airport' AND airport.faa = #{quote(values[0])} AND route.stops = 0 LIMIT #{values[1]} OFFSET #{values[2]}", options)
   }
 end
