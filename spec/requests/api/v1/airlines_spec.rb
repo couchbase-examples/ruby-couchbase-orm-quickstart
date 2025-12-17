@@ -134,7 +134,11 @@ RSpec.describe 'Airlines API', type: :request do
 
     context 'when the airline is deleted successfully' do
       it 'returns a success message' do
+        # Clean up any existing test data first to ensure idempotent test
+        delete "/api/v1/airlines/#{airline_id}"
+
         post "/api/v1/airlines/#{airline_id}", params: { airline: airline_params }
+        expect(response).to have_http_status(:created)
 
         delete "/api/v1/airlines/#{airline_id}"
 
