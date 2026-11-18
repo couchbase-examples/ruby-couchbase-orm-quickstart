@@ -11,8 +11,8 @@ RUN apt-get update -qq && \
 # Set the working directory in the container
 WORKDIR /app
 
-# Install Rails gem with version 7.1
-RUN gem install rails -v '7.1'
+# Install Rails gem with version 8.1
+RUN gem install rails -v '8.1.4.1'
 
 # Copy the Gemfile and Gemfile.lock into the container
 COPY Gemfile Gemfile.lock ./
