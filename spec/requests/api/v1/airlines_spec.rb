@@ -187,6 +187,14 @@ RSpec.describe 'Airlines API', type: :request do
       expect(response.content_type).to eq('application/json; charset=utf-8')
       expect(JSON.parse(response.body)).to eq(expected_airlines)
     end
+
+    it 'rejects a non-integer limit before querying Couchbase' do
+      get '/api/v1/airlines/list', params: { country:, limit: 'abc', offset: }
+
+      expect(response).to have_http_status(:bad_request)
+      expect(JSON.parse(response.body)).to eq({ 'error' => 'Invalid request',
+                                                'message' => 'limit must be a non-negative integer' })
+    end
   end
 
   describe 'GET /api/v1/airlines/to-airport' do
@@ -226,6 +234,26 @@ RSpec.describe 'Airlines API', type: :request do
         expect(response).to have_http_status(:ok)
         expect(response.content_type).to eq('application/json; charset=utf-8')
         expect(JSON.parse(response.body)).to eq(expected_airlines)
+      end
+    end
+
+    context 'when limit and offset are omitted' do
+      it 'defaults to the first 10 airlines' do
+        get '/api/v1/airlines/to-airport', params: { destinationAirportCode: destination_airport_code }
+
+        expect(response).to have_http_status(:ok)
+        expect(JSON.parse(response.body)).to eq(expected_airlines)
+      end
+    end
+
+    context 'when offset is negative' do
+      it 'returns a bad request error' do
+        get '/api/v1/airlines/to-airport',
+            params: { destinationAirportCode: destination_airport_code, limit:, offset: '-1' }
+
+        expect(response).to have_http_status(:bad_request)
+        expect(JSON.parse(response.body)).to eq({ 'error' => 'Invalid request',
+                                                  'message' => 'offset must be a non-negative integer' })
       end
     end
 

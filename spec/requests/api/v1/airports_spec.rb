@@ -207,6 +207,17 @@ RSpec.describe 'Airports API', type: :request do
       end
     end
 
+    context 'when limit is not an integer' do
+      it 'returns a bad request error' do
+        get '/api/v1/airports/direct-connections',
+            params: { destinationAirportCode: destination_airport_code, limit: '10 OFFSET 0', offset: }
+
+        expect(response).to have_http_status(:bad_request)
+        expect(JSON.parse(response.body)).to eq({ 'error' => 'Invalid request',
+                                                  'message' => 'limit must be a non-negative integer' })
+      end
+    end
+
     context 'when the destination airport code is not provided' do
       it 'returns a bad request error' do
         get '/api/v1/airports/direct-connections'
