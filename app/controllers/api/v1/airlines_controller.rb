@@ -3,6 +3,8 @@
 module Api
   module V1
     class AirlinesController < ApplicationController
+      include Pagination
+
       skip_before_action :verify_authenticity_token, only: %i[create update destroy]
       before_action :set_airline, only: %i[show update destroy]
 
@@ -77,10 +79,9 @@ module Api
       # GET /api/v1/airlines/list
       def index
         country = params[:country]
-        limit = params[:limit] || 10
-        offset = params[:offset] || 0
 
         begin
+          limit, offset = pagination_params
           airlines = Airline.list_by_country_or_all(key: [country, limit, offset])
 
           airlines = airlines.pluck(:callsign, :country, :iata, :icao, :name)
@@ -107,8 +108,7 @@ module Api
         raise ArgumentError, 'Destination airport is missing' unless params[:destinationAirportCode].present?
 
         destination_airport = params[:destinationAirportCode]
-        limit = params[:limit] || 10
-        offset = params[:offset] || 0
+        limit, offset = pagination_params
 
         airlines = Airline.to_airport(key: [destination_airport, limit, offset])
                           .pluck(:callsign, :country, :iata, :icao, :name)

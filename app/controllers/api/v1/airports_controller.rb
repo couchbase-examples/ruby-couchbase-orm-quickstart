@@ -3,6 +3,8 @@
 module Api
   module V1
     class AirportsController < ApplicationController
+      include Pagination
+
       skip_before_action :verify_authenticity_token, only: %i[create update destroy]
       before_action :set_airport, only: %i[show update destroy]
 
@@ -113,8 +115,7 @@ module Api
         raise ArgumentError, 'Destination airport is missing' unless params[:destinationAirportCode].present?
 
         destination_airport = params[:destinationAirportCode]
-        limit = params[:limit] || 10
-        offset = params[:offset] || 0
+        limit, offset = pagination_params
 
         destination_airports = Route.direct_connections(key: [destination_airport, limit, offset])
                                     .pluck(:destinationairport)
